@@ -1,9 +1,4 @@
 
-
-<script setup lang="ts">
-import LoginView from './views/LoginView.vue';
-</script>
-
 <template>
   
   <LoginView /> 
@@ -11,6 +6,11 @@ import LoginView from './views/LoginView.vue';
 
 
 </template>
+
+<script setup lang="ts">
+import LoginView from './modules/views/LoginView.vue';
+</script>
+
 
 <style scoped>
 header {
