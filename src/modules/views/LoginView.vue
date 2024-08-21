@@ -5,7 +5,6 @@
     <label for="username" class="block text-sm font-medium mb-2">Usuario</label>
     <input
       v-model="user"
-      @keypress="enviar"
       type="text"
       id="username"
       placeholder="User"
@@ -14,8 +13,7 @@
 
     <label for="password" class="block text-sm font-medium mb-2">Contraseña</label>
     <input
-        v-model="password"
-        @keypress="enviar"
+      v-model="password"
       type="password"
       id="password"
       placeholder="Password"
@@ -37,6 +35,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import router from '../router';
 
 const user = ref('');
 const password = ref("");
@@ -62,6 +61,7 @@ fetch('http://localhost:8000/login', {
         if (!response.ok) {
           throw new Error('Error en la solicitud');
         }
+        router.push('/sidebar')
         return response.json();
       })
       .then(data => {
@@ -72,8 +72,6 @@ fetch('http://localhost:8000/login', {
         console.error('Hubo un error:', error);
         // Manejar el error
       });
-
-
 };
 
 
