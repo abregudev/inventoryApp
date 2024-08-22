@@ -12,12 +12,18 @@ export const router = createRouter({
     {
       path: '/sidebar',
       name: 'sidebar',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('@/modules/views/SideBarView.vue')
-    }
-  ]
-})
+      component: () => import('@/modules/layouts/SidebarLayout.vue'),
+      children: [ 
+        {
+          path: '/inventario',
+          name: 'inventario',
+          component: () => import('@/modules/views/InventarioView.vue')
+        },
+        
+        
+      ]
+    },
+  ],
+});
 
 export default router
