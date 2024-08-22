@@ -19,8 +19,16 @@ export const router = createRouter({
           name: 'inventario',
           component: () => import('@/modules/views/InventarioView.vue')
         },
-        
-        
+        {
+          path: '/nuevoproducto',
+          name: 'nuevoproducto',
+          component: () => import('@/modules/views/InsertarProduto.vue')
+        },
+        {
+          path: '/ventas',
+          name: 'ventas',
+          component: () => import('@/modules/views/VentasView.vue')
+        },
       ]
     },
   ],
