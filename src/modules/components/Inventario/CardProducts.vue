@@ -1,4 +1,20 @@
 <template>
-    <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus tenetur cumque veritatis nobis totam minus! Consequatur ea laborum quos eveniet cumque commodi accusantium maxime! Ex autem possimus exercitationem corporis suscipit.
-    Maiores odio, sunt quia architecto officia id provident corrupti eos autem, labore quasi et ratione mollitia culpa quas temporibus explicabo perferendis vitae optio. Consectetur repellat, quasi vitae iusto corporis atque!</h1>
+    <div class="max-w-sm mx-10 mt-5 bg-white shadow-lg rounded-lg overflow-hidden">
+      <!-- Imagen principal -->
+      <img class="w-full h-48 object-cover" src="https://via.placeholder.com/300x300" alt="Producto">
+  
+      <!-- Contenido de la tarjeta -->
+      <div class="p-4">
+        <!-- Nombre del producto -->
+        <h2 class="text-xl font-semibold text-gray-800">Nombre:</h2>
+  
+        <!-- Precio -->
+        <p class="text-gray-600 mt-2">Precio: 99</p>
+  
+        <!-- Stock -->
+        <p class="text-gray-600 mt-2">Stock: 20</p>
+      </div>
+    </div>
 </template>
+  
+    
