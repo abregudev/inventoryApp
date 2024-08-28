@@ -1,11 +1,17 @@
 <template>
   <form @submit.prevent="handleSearch" class="relative flex-grow">
     <input
+      v-model="input"
+      name=""
+      id=""
       type="text"
-      placeholder="Search..."
+      placeholder="Inserte code..."
       class="w-full pl-3 pr-10 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
     />
-    <button type="submit" class="absolute right-0 top-0 mt-2 mr-3">
+    <button 
+    @click="searchCode"
+    type="submit" 
+    class="absolute right-0 top-0 mt-2 mr-3">
       <svg
         class="h-6 w-6 text-gray-400"
         fill="none"
@@ -22,32 +28,12 @@
   </form>
 </template>
 
-
-
 <script lang="ts" setup>
 const handleSearch = () => {
   // Implement search functionality
   console.log('Search submitted');
 };
-</script>
 
-<!-- <template>
-  <input
-    v-model="input"
-    class="ml-12 bg-transparent shadow-none outline-none p-2 border rounded-lg border-black mt-5"
-    type="text"
-    name=""
-    id=""
-    placeholder="Inserte code"
-  />
-  <button @click="searchCode" class="ml-12 mt-4 p-2 bg-blue-500 text-white rounded-lg">
-    <div class="w-4 h-4 border-2 border-white rounded-full relative">
-      <div class="w-2 h-0.5 bg-white absolute top-3 left-3 transform rotate-45"></div>
-    </div>
-  </button>
-</template>
-
-<script lang="ts" setup>
 import { ref } from 'vue';
 // Define un ref para capturar el valor del input
 const input = ref('');
@@ -82,5 +68,5 @@ const searchCode = () => {
       // Manejar el error
     });
 };
-</script> -->
+</script>
 
