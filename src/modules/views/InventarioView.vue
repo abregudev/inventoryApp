@@ -1,6 +1,6 @@
 <template>
     <section>
-        <div class=" flex flex-row gap-5">
+        <div class=" flex flex-row gap-5  justify-center center  mt-20">
             <CategoryProducts/>
             <CardProducts/>
         </div>

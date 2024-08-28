@@ -13,17 +13,13 @@
       </div>
 
       <!-- Search Bar -->
-      <div class="hidden md:flex flex-grow max-w-md mx-4 items-center">
+      <div class="flex justify-around">
        <BuscadorProduct/>
 
-        <nav class="bg-gray-100 ml-4">
-          <ul class="flex space-x-4">
-            <li v-for="item in menuItems" :key="item.route">
-              <RouterLink :to="item.route" class="text-gray-700 hover:text-blue-500">
-                {{ item.name }}
-              </RouterLink>
-            </li>
-          </ul>
+        <nav class=" ml-4 ml-20 flex w-[400px] justify-between items-center">
+          <RouterLink class="font-meidun" to="/nuevoproducto">Agregar</RouterLink>
+          <RouterLink class="font-meidun" to="/inventario">Inventario</RouterLink>
+          <RouterLink class="font-meidun" to="/ventas">Ventras</RouterLink>
         </nav>
       </div>
       <!-- Navigation Icons -->
@@ -38,17 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
 import CarritoLayout from './CarritoLayout.vue';
 import BuscadorProduct from '../components/Inventario/BuscadorProduct.vue';
-
-const menuItems = ref([
-  { name: 'Insertar Producto', route: '/nuevoproducto' },
-  { name: 'Inventario', route: '/inventario' },
-  { name: 'Ventas', route: '/ventas' },
-  { name: 'Log Out', route: '/logout' },
-]);
-
 
 </script>
