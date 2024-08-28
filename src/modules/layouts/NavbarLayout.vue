@@ -16,14 +16,15 @@
       <div class="flex justify-around">
        <BuscadorProduct/>
 
-        <nav class=" ml-4 ml-20 flex w-[400px] justify-between items-center">
-          <RouterLink class="font-meidun" to="/nuevoproducto">Agregar</RouterLink>
-          <RouterLink class="font-meidun" to="/inventario">Inventario</RouterLink>
-          <RouterLink class="font-meidun" to="/ventas">Ventras</RouterLink>
+        <nav class="ml-20 flex w-[400px] justify-between items-center">
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/inventario">Inventario</RouterLink>
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/nuevoproducto">Agregar</RouterLink>
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/ventas">Ventas</RouterLink>
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/home">Resumen</RouterLink>
         </nav>
       </div>
       <!-- Navigation Icons -->
-      <CarritoLayout/>
+      <CarritoView/>
     </div>
 
   </header>
@@ -34,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import CarritoLayout from './CarritoLayout.vue';
+import CarritoView from '../views/CarritoView.vue';
 import BuscadorProduct from '../components/Inventario/BuscadorProduct.vue';
 
 </script>

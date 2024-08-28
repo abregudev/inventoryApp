@@ -1,6 +1,6 @@
 <template>
-    <div class="flex justify-center mt-64">
-        <div class="w-[600px] h-[450px] border rounded-xl p-5  ">
+    <div class="flex justify-center mt-[160px]">
+        <div class="w-[750px] h-[450px] border-[1px] rounded-xl p-5 shadow-lg">
             <h1 class=" text-slate-900 text-[20px]">Nuevo Producto</h1>
             
             <div class="flex flex-col justify-around items-center h-full">
