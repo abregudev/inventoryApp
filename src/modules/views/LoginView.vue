@@ -48,7 +48,6 @@ const enviar = () => {
   "user": user.value,
   "password": password.value
 }
-
 // Hacer la petición POST usando fetch
 fetch('http://localhost:8000/login', {
         method: 'POST',
@@ -73,8 +72,5 @@ fetch('http://localhost:8000/login', {
         // Manejar el error
       });
 };
-
-
-
 </script>
 
