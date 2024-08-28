@@ -26,19 +26,14 @@
           >
             -
           </button>
-
           <span class="bg-gray-100 px-4 py-1">{{ quantities[index] }}</span>
-
           <button
             @click="increaseQuantity(index)"
             class="bg-gray-200 text-gray-800 px-2 py-1 rounded-r-md hover:bg-gray-300 transition duration-200"
           >
             +
           </button>
-          <button
-        
-            class="ml-4 text-red-500 hover:text-red-700 transition duration-200"
-          >
+          <button  @click="removeItem(index)" class="ml-4 text-red-500 hover:text-red-700 transition duration-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
