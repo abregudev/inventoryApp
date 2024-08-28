@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/modules/views/LoginView.vue'
+import  Sidebar  from '@/modules/layouts/SidebarLayout.vue';
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,7 +13,7 @@ export const router = createRouter({
     {
       path: '/sidebar',
       name: 'sidebar',
-      component: () => import('@/modules/layouts/SidebarLayout.vue'),
+      component: Sidebar,
       children: [ 
         {
           path: '/inventario',

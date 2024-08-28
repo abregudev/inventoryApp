@@ -1,12 +1,15 @@
 <template>
-    <section class="">
-        <BuscadorProducts/>
-        <CardProducts/>
+    <section>
+        <div class=" flex flex-row gap-5">
+            <CategoryProducts/>
+            <CardProducts/>
+        </div>
     </section>
     
 </template>
 
 <script lang="ts" setup>
-import BuscadorProducts from '../components/Inventario/BuscadorProducts.vue';
+import CardProducts from '../components/Inventario/CardProducts.vue';
+import CategoryProducts from '../components/Inventario/CategoryProducts.vue';
 </script>
 
