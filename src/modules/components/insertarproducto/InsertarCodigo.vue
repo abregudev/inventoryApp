@@ -1,13 +1,45 @@
 <template>
-    <div class="flex justify-center mt-64 h-full">
-        <div class="w-[400px] h-[450px] border rounded-xl p-5  ">
-            <h1 class=" text-slate-900 text-[20px]">Ingrese Codigo</h1>
-            
-            <div class="flex flex-col justify-around items-center h-full">
-                
-                <input type="text" placeholder="#EJEMPLO" class=" border-b-2">
-                <button class="p-2 pl-5 pr-5 bg-black text-white font-bold rounded-xl">Ingresar</button>
-            </div>
-        </div>
+    <div class="bg-white border p-8 rounded-lg shadow-md max-w-md mx-auto mt-32">
+      <h1 class="text-3xl font-semibold mb-6 text-center">Ingrese Código</h1>
+      
+      <div class="mb-6">
+        <input 
+          v-model="codigo"
+          type="text" 
+          placeholder="#EJEMPLO"
+          class="w-full p-3 text-lg border-b-2 border-gray-300 focus:border-black focus:outline-none text-center uppercase"
+        >
+      </div>
+      
+      <div class="text-center">
+        <button 
+          @click="ingresarCodigo" 
+          class="bg-black text-white px-6 py-2 rounded-full text-lg font-semibold hover:bg-gray-800 transition-colors duration-200"
+        >
+          Ingresar
+        </button>
+      </div>
     </div>
-</template>
+  </template>
+  
+  <script lang="ts">
+  import { defineComponent, ref } from 'vue'
+  
+  export default defineComponent({
+    name: 'IngresarCodigo',
+    setup() {
+      const codigo = ref('')
+  
+      const ingresarCodigo = () => {
+        // Aquí iría la lógica para procesar el código ingresado
+        console.log('Código ingresado:', codigo.value)
+        // Puedes añadir aquí la lógica para validar o enviar el código
+      }
+  
+      return {
+        codigo,
+        ingresarCodigo
+      }
+    }
+  })
+  </script>

@@ -17,10 +17,10 @@
        <BuscadorProduct/>
 
         <nav class="ml-20 flex w-[400px] justify-between items-center">
-          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/inventario">Inventario</RouterLink>
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/home">Dashboard</RouterLink>
+          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/inventario">Productos</RouterLink>
           <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/nuevoproducto">Agregar</RouterLink>
           <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/ventas">Ventas</RouterLink>
-          <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/home">Resumen</RouterLink>
         </nav>
       </div>
       <!-- Navigation Icons -->

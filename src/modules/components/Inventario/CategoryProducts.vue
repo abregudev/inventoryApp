@@ -1,19 +1,17 @@
 <template>
-  <div class="">
-    <main class="container mx-auto px-4 py-8">
-      <div class="flex flex-wrap -mx-4">
-        <div class="w-full px-4">
-          <div class="bg-white shadow rounded-lg p-6 w-30">
-            <h3 class="font-bold text-lg mb-4">Categories</h3>
-            <ul class="space-y-2">
-              <li v-for="category in categories" :key="category.name">
-                <a href="#" class="text-gray-600 hover:text-gray-900">{{ category.name }} ({{ category.count }})</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </main>
+  <div class="bg-white shadow-lg rounded-lg p-6">
+    <h3 class="font-bold text-xl mb-4 text-gray-800">Categorías</h3>
+    <ul class="space-y-3">
+      <li v-for="category in categories" :key="category.name" 
+          class="transition duration-300 ease-in-out transform hover:scale-105">
+        <a href="#" class="flex items-center justify-between p-3 rounded-md bg-gray-50 hover:bg-gray-100">
+          <span class="text-gray-700 font-medium">{{ category.name }}</span>
+          <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+            {{ category.count }}
+          </span>
+        </a>
+      </li>
+    </ul>
   </div>
 </template>
 
