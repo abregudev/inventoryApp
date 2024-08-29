@@ -1,11 +1,11 @@
 <template>
   <div class="bg-white shadow-lg rounded-lg p-6 max-w-2xl mx-auto mt-24">
     <h2 class="text-2xl font-bold mb-6 text-gray-800">Carrito de Compras</h2>
-
+    
     <div v-if="cartItems.length === 0" class="text-center py-8">
       <p class="text-gray-500">Tu carrito está vacío</p>
     </div>
-
+    
     <div v-else>
       <div
         v-for="(item, index) in cartItems"
@@ -15,13 +15,13 @@
         <div class="flex items-center">
           <img :src="item.thumbnail" alt="" class="w-16 h-16 object-cover rounded-md mr-4" />
           <div>
-            <h3 class="font-semibold text-gray-800">{{ item.title}}</h3>
-            <p class="text-sm text-gray-600"> {{ item.price}}c/u</p>
+            <h3 class="font-semibold text-gray-800">{{ item.title }}</h3>
+            <p class="text-sm text-gray-600">{{ item.price }}c/u</p>
           </div>
         </div>
         <div class="flex items-center">
           <button
-          @click="decreaseQuantity(index)"
+            @click="decreaseQuantity(index)"
             class="bg-gray-200 text-gray-800 px-2 py-1 rounded-l-md hover:bg-gray-300 transition duration-200"
           >
             -
@@ -33,7 +33,7 @@
           >
             +
           </button>
-          <button  @click="removeItem(index)" class="ml-4 text-red-500 hover:text-red-700 transition duration-200">
+          <button @click="removeItem(index)" class="ml-4 text-red-500 hover:text-red-700 transition duration-200">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
@@ -49,46 +49,52 @@
           </button>
         </div>
       </div>
-
+      
       <div class="mt-6">
         <div class="flex justify-between mb-2">
-          <span class="font-semibold text-gray-600">{{ tax.toFixed(2) }}</span>
-          <!-- <span class="text-gray-800">${{ subtotal.toFixed(2) }}</span> -->
+          <span class="font-semibold text-gray-600">Subtotal:</span>
+          <span class="text-gray-800">S/{{ subtotal.toFixed(2) }}</span>
         </div>
         <div class="flex justify-between mb-2">
-          <span class="font-semibold text-gray-600">{{ subtotal.toFixed(2) }}</span>
-          <!-- <span class="text-gray-800">${{ tax.toFixed(2) }}</span> -->
+          <span class="font-semibold text-gray-600">IGV (18%):</span>
+          <span class="text-gray-800">S/{{ tax.toFixed(2) }}</span>
         </div>
         <div class="flex justify-between text-xl font-bold">
           <span class="text-gray-800">Total:</span>
-          <span class="text-green-600">{{ total.toFixed(2) }}</span>
+          <span class="text-green-600">S/{{ total.toFixed(2) }}</span>
         </div>
       </div>
-
+      
       <button
+        @click="openPaymentModal"
         class="w-full mt-6 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
       >
         Proceder al pago
       </button>
     </div>
   </div>
+
+  <!-- Modal de Pago -->
+  <PaymentModal 
+    :isOpen="isPaymentModalOpen"
+    @close="closePaymentModal"
+    @submit="handlePaymentSubmit"
+  />
 </template>
 
 <script setup lang="ts">
-
-
 import { useCartStore } from '@/modules/stores/CartStores';
 import { computed, ref } from 'vue';
+import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea correcta
 
 const cartStore = useCartStore();
-
 console.log(cartStore.cart, 'kasihjgfailwd');
 let cartItems = cartStore.cart;
 
 // Variable reactiva para almacenar la cantidad de cada producto
 const quantities = ref<number[]>(cartItems.map(item => item.quantity));
 
-  const increaseQuantity = (index: number) => {
+const increaseQuantity = (index: number) => {
   quantities.value[index] += 1;
 };
 
@@ -111,4 +117,23 @@ const removeItem = (index: number) => {
   quantities.value.splice(index, 1); // Eliminar la cantidad asociada
 };
 
+// Lógica para el modal de pago
+const isPaymentModalOpen = ref(false);
+
+const openPaymentModal = () => {
+  isPaymentModalOpen.value = true;
+};
+
+const closePaymentModal = () => {
+  isPaymentModalOpen.value = false;
+};
+
+const handlePaymentSubmit = (paymentData: any) => {
+  // Aquí puedes manejar los datos del pago
+  console.log('Datos de pago recibidos:', paymentData);
+  // Implementa la lógica para procesar el pago
+  // Por ejemplo, puedes enviar los datos a tu backend
+  // y luego limpiar el carrito si el pago es exitoso
+  closePaymentModal();
+};
 </script>
