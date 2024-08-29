@@ -37,6 +37,6 @@ watch(() => cartStore.cart, () => {
 });
 
 // Logging for debugging
-console.log('Desde carrito de compras');
+//console.log('Desde carrito de compras');
 
 </script>

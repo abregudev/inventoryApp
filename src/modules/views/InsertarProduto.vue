@@ -1,7 +1,7 @@
 <template>
     <ProductoRegistrado />
-    <!-- <insertar-cokdigo /> -->
-    <!-- <NuevoProductoForm /> -->
+    <insertar-codigo />
+    <NuevoProductoForm /> 
 </template>
 
 <script setup lang="ts">
