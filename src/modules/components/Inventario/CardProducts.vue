@@ -34,7 +34,7 @@ const cartStore = useCartStore();
 // Variable reactiva para almacenar los productos
 const products = ref<IProduct[]>([]);
 // Computed para limitar a 2 productos
-const limitedProducts = computed(() => products.value.slice(0, 6));
+const limitedProducts = computed(() => products.value.slice(0, 20));
 
 const fetchProducts = async (): Promise<void> => {
   try {
