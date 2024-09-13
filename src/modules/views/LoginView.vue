@@ -78,41 +78,42 @@
 import { ref } from 'vue'
 import router from '../router';
 
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
 const user = ref('');
 const password = ref("");
 
 const enviar = () => {
-  console.log('Enviando credenciales')
-  console.log(user.value)
-  console.log(password.value)
 
   const loginData = {
   "user": user.value,
   "password": password.value
+
 }
 // Hacer la petición POST usando fetch
-fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error en la solicitud');
-        }
-        router.push('/sidebar')
-        return response.json();
-      })
-      .then(data => {
-        console.log('Respuesta del servidor:', data);
-        // Manejar la respuesta exitosa
-      })
-      .catch(error => {
-        console.error('Hubo un error:', error);
-        // Manejar el error
-      });
-};
+
+  fetch(`${baseUrl}/login/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(loginData)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error en la solicitud');
+      }
+      router.push('/sidebar')
+      return response.json();
+    })
+    .then(data => {
+      console.log('Respuesta del servidor:', data);
+      // Manejar la respuesta exitosa
+    })
+    .catch(error => {
+      console.error('Hubo un error:', error);
+      // Manejar el error
+    });
+  };
 
 </script>
