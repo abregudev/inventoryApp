@@ -21,7 +21,7 @@
         <!-- Columna derecha: Carrito de Compras (fijo) -->
         <div class="lg:w-1/4">
           <div class="sticky top-8">
-            <CartBuy />
+            
           </div>
         </div>
       </div>
@@ -33,7 +33,7 @@
 import { onMounted } from 'vue';
 import CategoryProducts from '../components/Inventario/CategoryProducts.vue';
 import CardProducts from '../components/Inventario/CardProducts.vue';
-import CartBuy from '../components/carrito/CartBuy.vue';
+//import CartBuy from '../components/carrito/CartBuy.vue';
 
 onMounted(() => {
   console.log('Vista de inventario montada');

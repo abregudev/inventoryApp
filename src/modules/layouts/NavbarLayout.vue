@@ -23,6 +23,7 @@
           <RouterLink class=" focus:border-b-[2px] border-gray-700" to="/ventas">Ventas</RouterLink>
         </nav>
       </div>
+      <CarritoView/>
     </div>
 
   </header>

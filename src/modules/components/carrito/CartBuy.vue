@@ -26,6 +26,7 @@
           >
             -
           </button>
+        
           <span class="bg-gray-100 px-4 py-1">{{ quantities[index] }}</span>
           <button
             @click="increaseQuantity(index)"
@@ -88,7 +89,7 @@ import { computed, ref } from 'vue';
 import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea correcta
 
 const cartStore = useCartStore();
-console.log(cartStore.cart, 'kasihjgfailwd');
+//console.log(cartStore.cart, 'kasihjgfailwd');
 let cartItems = cartStore.cart;
 
 // Variable reactiva para almacenar la cantidad de cada producto
