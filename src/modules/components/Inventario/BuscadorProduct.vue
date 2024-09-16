@@ -29,6 +29,10 @@
 </template>
 
 <script lang="ts" setup>
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
+
 const handleSearch = () => {
   // Implement search functionality
   console.log('Search submitted');
@@ -45,7 +49,7 @@ const searchCode = () => {
   
   console.log(inputValue.value);
 
-  fetch('http://localhost:8000/search', {
+  fetch(`${baseUrl}/search/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
