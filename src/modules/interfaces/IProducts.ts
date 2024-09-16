@@ -1,8 +1,10 @@
 export default interface IProduct {
     id: number;
-    title: string;
+    code: string;
     price: number;
     stock: number;
-    quantity: number;
-    thumbnail: string;
+    category: string;
+    image: string;
+    // quantity: number;
+    // thumbnail: string;
 }

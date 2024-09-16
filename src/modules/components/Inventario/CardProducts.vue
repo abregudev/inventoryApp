@@ -2,13 +2,13 @@
   <div class="flex justify-center py-8">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
-        v-for="product in limitedProducts"
+        v-for="product in products"
         :key="product.id"
         class="shadow rounded-lg overflow-hidden"
       >
-        <img :src="product.thumbnail" alt="producto" class="h-48 object-cover" />
+        <img :src="product.image" alt="producto" class="h-48 object-cover" />
         <div class="p-4">
-          <h3 class="font-bold text-lg mb-2">{{ product.title }}</h3>
+          <h3 class="font-bold text-lg mb-2">{{ product.code }}</h3>
           <p class="text-gray-600">Precio: ${{ product.price }}</p>
           <p class="text-gray-600 mt-2">Stock: {{ product.stock }}</p>
           <button
@@ -26,6 +26,7 @@
 <script lang="ts" setup>import type IProduct from '@/modules/interfaces/IProducts';
 import { useCartStore } from '@/modules/stores/CartStores';
 import { computed, onMounted, ref } from 'vue'; 
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 
 
@@ -33,14 +34,16 @@ const cartStore = useCartStore();
 // Variable reactiva para almacenar los productos
 const products = ref<IProduct[]>([]);
 // Computed para limitar a 2 productos
-const limitedProducts = computed(() => products.value.slice(0, 6));
+// const limitedProducts = computed(() => products.value.slice(0, 6));
 
 const fetchProducts = async (): Promise<void> => {
   try {
-    const response = await fetch('https://dummyjson.com/products');
+
+    const response = await fetch(`${baseUrl}/products/list-products/`);
     const data = await response.json();
+    console.log(data)
     //console.log(data);
-    products.value = data.products; // Accede a la propiedad "products"
+    products.value = data; // Accede a la propiedad "products"
   } catch (error) {
     console.error('Error al cargar los productos:', error);
   }
