@@ -133,7 +133,7 @@ export default defineComponent({
       { id: 3, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'transferencia' },
       { id: 3, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'yape' },
       { id: 3, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'yape' },
-      { id: 3, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'transferencia' },
+      
       // ... más ventas ...
     ])
 

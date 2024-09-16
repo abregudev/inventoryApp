@@ -23,8 +23,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import type IProduct from '@/modules/interfaces/IProducts';
+<script lang="ts" setup>import type IProduct from '@/modules/interfaces/IProducts';
 import { useCartStore } from '@/modules/stores/CartStores';
 import { computed, onMounted, ref } from 'vue'; 
 
