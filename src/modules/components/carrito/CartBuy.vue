@@ -1,11 +1,11 @@
 <template>
   <div class="bg-white shadow-lg rounded-lg p-6 max-w-2xl mx-auto mt-24">
     <h2 class="text-2xl font-bold mb-6 text-gray-800">Carrito de Compras</h2>
-    
+
     <div v-if="cartItems.length === 0" class="text-center py-8">
       <p class="text-gray-500">Tu carrito está vacío</p>
     </div>
-    
+
     <div v-else>
       <div
         v-for="(item, index) in cartItems"
@@ -26,7 +26,7 @@
           >
             -
           </button>
-        
+
           <span class="bg-gray-100 px-4 py-1">{{ quantities[index] }}</span>
           <button
             @click="increaseQuantity(index)"
@@ -34,7 +34,10 @@
           >
             +
           </button>
-          <button @click="removeItem(index)" class="ml-4 text-red-500 hover:text-red-700 transition duration-200">
+          <button
+            @click="removeItem(index)"
+            class="ml-4 text-red-500 hover:text-red-700 transition duration-200"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5"
@@ -50,7 +53,7 @@
           </button>
         </div>
       </div>
-      
+
       <div class="mt-6">
         <div class="flex justify-between mb-2">
           <span class="font-semibold text-gray-600">Subtotal:</span>
@@ -65,7 +68,7 @@
           <span class="text-green-600">S/{{ total.toFixed(2) }}</span>
         </div>
       </div>
-      
+
       <button
         @click="openPaymentModal"
         class="w-full mt-6 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
@@ -76,7 +79,7 @@
   </div>
 
   <!-- Modal de Pago -->
-  <PaymentModal 
+  <PaymentModal
     :isOpen="isPaymentModalOpen"
     @close="closePaymentModal"
     @submit="handlePaymentSubmit"
@@ -87,8 +90,8 @@
 //useCartStore: Importa el store de carrito de compras desde CartStores para acceder al carrito.
 import { useCartStore } from '@/modules/stores/CartStores';
 //computed, ref: Importa las funciones de Vue para manejar valores reactivos y propiedades computadas
-import { computed, ref } from 'vue';
-//PaymentModal: Importa un componente llamado PaymentModal.vue, que probablemente sea una ventana emergente para el pago. 
+import { computed, onMounted, ref, watch } from 'vue';
+//PaymentModal: Importa un componente llamado PaymentModal.vue, que probablemente sea una ventana emergente para el pago.
 import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea correcta
 
 //cartStore: Creas una instancia del store del carrito, lo que te permite interactuar con los datos del carrito.
@@ -97,20 +100,20 @@ const cartStore = useCartStore();
 let cartItems = cartStore.cart;
 //quantities: Es una variable reactiva que almacena la cantidad de cada producto en el carrito.
 // Variable reactiva para almacenar la cantidad de cada producto
-const quantities = ref<number[]>(cartItems.map(item => item.quantity));
+const quantities = ref<number[]>(cartItems.map((item) => item.quantity));
 //increaseQuantity: Aumenta la cantidad del producto en la posición index dentro del array quantities
 const increaseQuantity = (index: number) => {
   //Esto es útil cuando el usuario hace clic para agregar más unidades de un producto.
   quantities.value[index] += 1;
 };
-//decreaseQuantity: Reduce la cantidad del producto en la posición index, 
+//decreaseQuantity: Reduce la cantidad del producto en la posición index,
 const decreaseQuantity = (index: number) => {
   //pero solo si la cantidad es mayor a 1. Evita que el valor llegue a 0 o menos.
   if (quantities.value[index] > 1) {
     quantities.value[index] -= 1;
   }
 };
-//subtotal: Calcula el total del carrito antes de impuestos. 
+//subtotal: Calcula el total del carrito antes de impuestos.
 //Usa reduce para sumar el precio de cada producto multiplicado por la cantidad asociada en quantities.
 // Es una propiedad computada, lo que significa que se recalcula automáticamente cuando cambian las cantidades o los productos.
 const subtotal = computed(() => {
@@ -128,7 +131,7 @@ const removeItem = (index: number) => {
 
 // Lógica para el modal de pago
 //isPaymentModalOpen: Una variable reactiva que controla si el modal de pago está abierto o cerrado.
-const isPaymentModalOpen = ref(false);// Inicia como false, lo que indica que el modal está cerrado.
+const isPaymentModalOpen = ref(false); // Inicia como false, lo que indica que el modal está cerrado.
 //openPaymentModal: Cambia isPaymentModalOpen a true, lo que abre el modal de pago.
 const openPaymentModal = () => {
   isPaymentModalOpen.value = true;
@@ -144,8 +147,45 @@ const handlePaymentSubmit = (paymentData: any) => {
   // Implementa la lógica para procesar el pago
   // Por ejemplo, puedes enviar los datos a tu backend
   // y luego limpiar el carrito si el pago es exitoso
-  //Aquí podrías implementar la lógica para procesar el pago, 
+  //Aquí podrías implementar la lógica para procesar el pago,
   //como enviar la información al backend y limpiar el carrito si el pago es exitoso.
   closePaymentModal();
 };
+
+//GUARDAR CARRITO EN LOCALSTORAGE
+//watch es una función que observa cambios en las variables.
+watch(
+  //esta observando estas dos variables cartItems, quantities cuando algo cambia aqui
+  [cartItems, quantities],
+  //se ejecuta esta funcion 
+  //newCartItems contiene la nueva lista de productos del carrito.
+  //newQuantities contiene las nuevas cantidades asociadas a los productos.
+  ([newCartItems, newQuantities]) => {
+    //guarda los productos en localstoage y convierte la lista de productos en un formato que puede ser guardado como texto
+    localStorage.setItem('cart', JSON.stringify(newCartItems));
+    //cart y quantities es la clave que usamos para guardar esta informaciòn
+    localStorage.setItem('quantities', JSON.stringify(newQuantities));
+  },
+  //Le decimos a vue que observe los cambios de forma profunda es decir si algo cambia dentro de cartItems o quantities tambien detecte los cambios
+  { deep: true },
+);
+
+//RECUPERAR CARRITO DE LOCALSTORAGE recupera el carrito y las cantidades cuando la pagina se carga o recarga
+//esta funcion se ejecuta cuando el componente termina de cargarse es decir cuando esta lista
+onMounted(() => {
+  //Aqui tratamos de recuperar los productos del carrito q guardamos en el localStorage
+  //busca en memoria del navegador los datos guardados con la clave 'cart'
+  const savedCart = localStorage.getItem('cart');
+  const savedQuantities = localStorage.getItem('quantities');
+
+  //Si ambos existen entramos al bloque de codigo
+  if (savedCart && savedQuantities) {
+    //convierte el texto que estaba guardado en localStorage devuelta a un formato de lista
+    //asignamos esta lista a cartItems lo q restaura los productos en el carrito
+    cartItems = JSON.parse(savedCart);
+    //Aquì restauramos las cantidades de productos 
+    //quantities.value es donde se almacena las cantidades y lo asignamos datos recuperados desde localStorage
+    quantities.value = JSON.parse(savedQuantities);
+  }
+});
 </script>

@@ -39,8 +39,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              1
+            <span 
+              v-if="totalQuantity > 0"
+              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {{ totalQuantity }}
             </span>
           </RouterLink>
         </div>
@@ -102,8 +104,10 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              1
+            <span 
+              v-if="totalQuantity > 0"
+              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {{ totalQuantity }}
             </span>
           </RouterLink>
         </div>
@@ -117,15 +121,19 @@
 </template>
 
 <script setup lang="ts">
-//Lo utilizamos para crear variables reactivas.
-import { ref } from 'vue';
-//RouterLink: Componente que se utiliza para crear enlaces de navegación entre diferentes rutas de la aplicación.
-//RouterView: Lugar donde se renderizarán los componentes asociados con la ruta actual.
-import { RouterLink, RouterView } from 'vue-router';
-//isMenuOpen: Es una variable reactiva que indica si el menú está abierto o cerrado.
-const isMenuOpen = ref(false);
-//toggleMenu: Es una función que cambia el estado del menú
-const toggleMenu = () => {
+
+import { RouterLink, RouterView } from 'vue-router';//RouterView: Lugar donde se renderizarán los componentes asociados con la ruta actual.//RouterLink: Componente que se utiliza para crear enlaces de navegación entre diferentes rutas de la aplicación.
+
+import { useCartStore } from '@/modules/stores/CartStores';//Importa el store del carrito desde Pinia
+import { computed, ref } from 'vue';//Lo utilizamos para crear variables reactivas.
+
+const cartStore = useCartStore(); // Instancia el store del carrito
+const totalQuantity = computed(() => { // Computa la cantidad total de productos en el carrito
+  return cartStore.cart.reduce((sum, item) => sum + item.quantity, 0);
+});
+console.log(totalQuantity)
+const isMenuOpen = ref(false);//isMenuOpen: Es una variable reactiva que indica si el menú está abierto o cerrado.
+const toggleMenu = () => {//toggleMenu: Es una función que cambia el estado del menú
   //Esta línea invierte el valor actual, permitiendo abrir o cerrar el menú cada vez que se llama a la función.
   isMenuOpen.value = !isMenuOpen.value;
 };
