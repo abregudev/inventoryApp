@@ -13,9 +13,9 @@
         class="flex items-center justify-between border-b border-gray-200 py-4"
       >
         <div class="flex items-center">
-          <img :src="item.thumbnail" alt="" class="w-16 h-16 object-cover rounded-md mr-4" />
+          <img :src="item.image" alt="" class="w-16 h-16 object-cover rounded-md mr-4" />
           <div>
-            <h3 class="font-semibold text-gray-800">{{ item.title }}</h3>
+            <h3 class="font-semibold text-gray-800">{{ item.code }}</h3>
             <p class="text-sm text-gray-600">{{ item.price }}c/u</p>
           </div>
         </div>

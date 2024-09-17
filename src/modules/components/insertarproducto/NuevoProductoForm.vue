@@ -55,50 +55,60 @@
 </template>
 
 <script setup lang="ts">
-
+//Se utiliza para crear variables reactivas que actualizarán automáticamente la interfaz
 import { ref } from 'vue'
+//baseUrl: Aquí defines la URL base del servidor (API) que proviene de las variables de entorno configuradas con Vite (VITE_BASE_URL).
 const baseUrl = import.meta.env.VITE_BASE_URL;
-
-
+//producto: Es un objeto reactivo que representa un producto
 const producto = ref({
   category: '',
   description: '',
+  //el stock y price a 0). Este objeto almacenará la información del producto que se va a ingresar
   stock: 0,
   price: 0,
   code: '',
   image: ''
 })
-
+//nuevoStock: Es una variable reactiva que almacena el stock actualizado del producto. Comienza con un valor de 0.
 const nuevoStock = ref(0)
-
+//seleccionarImagen: Esta función se llama cuando el usuario selecciona una imagen
 const seleccionarImagen = () => {
+  // aquí es donde podrías implementar la lógica para manejar la selección de imágenes
   console.log('Seleccionar imagen')
   // Aquí iría la lógica para seleccionar una imagen
 }
-
+//ingresarProducto: Se activa cuando el usuario ingresa un producto
 const ingresarProducto = () => {
   console.log('Ingresando producto')
   console.log(producto.value)
   console.log('Nuevo stock:', nuevoStock.value)
-
+  //productData: Crea un nuevo objeto que contiene los datos actuales del producto
   const productData = {
+    //El operador de propagación (...) copia todas las propiedades del objeto producto en este nuevo objeto.
     ...producto.value,
   }
 
-  // Hacer la petición POST usando fetch
+  // fetch: Realiza una solicitud HTTP al servidor
+  //una petición POST a la URL /products/add-product/. Esta solicitud envía los datos del producto en formato JSON al servidor.
   fetch(`${baseUrl}/products/add-product/`, {
-    method: 'POST',
+    method: 'POST',//metodo post estamos enviando datos nuevos al servidor.
+    //Define el tipo de contenido que se envía, en este caso application/json.
     headers: {
       'Content-Type': 'application/json'
     },
+    //Convierte el objeto productData en un string JSON para enviarlo al servidor.
     body: JSON.stringify(productData)
   })
+  //Aquí se maneja la respuesta de la API.
   .then(response => {
+    // Si la respuesta no es correcta, se lanza un error.
     if (!response.ok) {
       throw new Error('Error en la solicitud')
     }
+    //Si la respuesta es válida, se convierte en formato JSON
     return response.json()
   })
+  //Una vez que la respuesta JSON es recibida, imprime los datos devueltos por el servidor y luego restablece el formulario a su estado inicial
   .then(data => {
     console.log('Respuesta del servidor:', data)
     // Limpiar el formulario después de ingresar el producto
@@ -112,6 +122,7 @@ const ingresarProducto = () => {
     }
     // Aquí puedes agregar lógica adicional, como mostrar un mensaje de éxito o redirigir a otra página
   })
+  // Si ocurre algún error durante la solicitud se captura y se imprime un mensaje de error
   .catch(error => {
     console.error('Hubo un error:', error)
     // Aquí puedes manejar el error, como mostrar un mensaje al usuario

@@ -117,18 +117,16 @@
 </template>
 
 <script setup lang="ts">
-<<<<<<< HEAD
-import CarritoView from '../views/CarritoView.vue';
-import BuscadorProduct from '../components/Inventario/BuscadorProduct.vue';
-</script>
-=======
+//Lo utilizamos para crear variables reactivas.
 import { ref } from 'vue';
+//RouterLink: Componente que se utiliza para crear enlaces de navegación entre diferentes rutas de la aplicación.
+//RouterView: Lugar donde se renderizarán los componentes asociados con la ruta actual.
 import { RouterLink, RouterView } from 'vue-router';
-
+//isMenuOpen: Es una variable reactiva que indica si el menú está abierto o cerrado.
 const isMenuOpen = ref(false);
-
+//toggleMenu: Es una función que cambia el estado del menú
 const toggleMenu = () => {
+  //Esta línea invierte el valor actual, permitiendo abrir o cerrar el menú cada vez que se llama a la función.
   isMenuOpen.value = !isMenuOpen.value;
 };
 </script>
->>>>>>> 52e8355adf68e1cc5e4817004f00d7c0b37bcea5
