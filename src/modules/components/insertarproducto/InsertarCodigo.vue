@@ -30,17 +30,11 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 const code = ref('')
 
 const codeSubmit = () => {
-  const codeInfo = code
 
-  console.log(codeInfo.value)
-
-  code.value = ''
-
-  fetch(`${baseUrl}/products/search-code/${code.value}`, {
+  console.log(code.value)
+  console.log(`${baseUrl}/products/search-code/${code.value}/`)
+  fetch(`${baseUrl}/products/search-code/${code.value}/`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
   })
   .then(response => {
     if(!response.ok) {
@@ -49,5 +43,7 @@ const codeSubmit = () => {
     return response.json()
   })
   .then(data => console.log(data))
+
+  
 } 
 </script>
