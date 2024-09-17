@@ -2,9 +2,11 @@
 //aqui se creo una interfaces con la estructura que debe seguir un objetos que usen esta interfaz
 export default interface IProduct {
     id: number;
-    title: string;
+    code: string;
     price: number;
     stock: number;
-    quantity: number;
-    thumbnail: string;
+    category: string;
+    image: string;
+    // quantity: number;
+    // thumbnail: string;
 }

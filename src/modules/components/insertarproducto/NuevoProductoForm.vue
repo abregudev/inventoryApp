@@ -5,12 +5,12 @@
     <div class="grid grid-cols-2 gap-6">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">CATEGORÍA</label>
-        <input v-model="producto.categoria" type="text" class="w-full p-2 border rounded-md">
+        <input v-model="producto.category" type="text" class="w-full p-2 border rounded-md">
       </div>
       
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">DESCRIPCIÓN</label>
-        <input v-model="producto.descripcion" type="text" class="w-full p-2 border rounded-md">
+        <input v-model="producto.description" type="text" class="w-full p-2 border rounded-md">
       </div>
       
       <div>
@@ -20,7 +20,7 @@
       
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">PRECIO</label>
-        <input v-model="producto.precio" type="number" class="w-full p-2 border rounded-md">
+        <input v-model="producto.price" type="number" class="w-full p-2 border rounded-md">
       </div>
       
       <div>
@@ -30,7 +30,7 @@
       
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">CÓDIGO</label>
-        <input v-model="producto.codigo" type="text" class="w-full p-2 border rounded-md">
+        <input v-model="producto.code" type="text" class="w-full p-2 border rounded-md">
       </div>
     </div>
     
@@ -55,15 +55,18 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref } from 'vue'
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
 
 const producto = ref({
-  categoria: '',
-  descripcion: '',
+  category: '',
+  description: '',
   stock: 0,
-  precio: 0,
-  codigo: '',
-  imagen: ''
+  price: 0,
+  code: '',
+  image: ''
 })
 
 const nuevoStock = ref(0)
@@ -78,17 +81,17 @@ const ingresarProducto = () => {
   console.log(producto.value)
   console.log('Nuevo stock:', nuevoStock.value)
 
-  const productoData = {
+  const productData = {
     ...producto.value,
   }
 
   // Hacer la petición POST usando fetch
-  fetch('http://localhost:5000/api/products', {
+  fetch(`${baseUrl}/products/add-product/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(productoData)
+    body: JSON.stringify(productData)
   })
   .then(response => {
     if (!response.ok) {
@@ -100,12 +103,12 @@ const ingresarProducto = () => {
     console.log('Respuesta del servidor:', data)
     // Limpiar el formulario después de ingresar el producto
     producto.value = {
-      categoria: '',
-      descripcion: '',
+      category: '',
+      description: '',
       stock: 0,
-      precio: 0,
-      codigo: '',
-      imagen: ''
+      price: 0,
+      code: '',
+      image: ''
     }
     // Aquí puedes agregar lógica adicional, como mostrar un mensaje de éxito o redirigir a otra página
   })
