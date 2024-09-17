@@ -36,5 +36,4 @@
 <script setup lang="ts">
 import CarritoView from '../views/CarritoView.vue';
 import BuscadorProduct from '../components/Inventario/BuscadorProduct.vue';
-
 </script>

@@ -84,57 +84,68 @@
 </template>
 
 <script setup lang="ts">
+//useCartStore: Importa el store de carrito de compras desde CartStores para acceder al carrito.
 import { useCartStore } from '@/modules/stores/CartStores';
+//computed, ref: Importa las funciones de Vue para manejar valores reactivos y propiedades computadas
 import { computed, ref } from 'vue';
+//PaymentModal: Importa un componente llamado PaymentModal.vue, que probablemente sea una ventana emergente para el pago. 
 import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea correcta
 
+//cartStore: Creas una instancia del store del carrito, lo que te permite interactuar con los datos del carrito.
 const cartStore = useCartStore();
-//console.log(cartStore.cart, 'kasihjgfailwd');
+//cartItems: Almacenas el carrito de compras (cartStore.cart) en una variable para poder acceder y modificar los productos.
 let cartItems = cartStore.cart;
-
+//quantities: Es una variable reactiva que almacena la cantidad de cada producto en el carrito.
 // Variable reactiva para almacenar la cantidad de cada producto
 const quantities = ref<number[]>(cartItems.map(item => item.quantity));
-
+//increaseQuantity: Aumenta la cantidad del producto en la posición index dentro del array quantities
 const increaseQuantity = (index: number) => {
+  //Esto es útil cuando el usuario hace clic para agregar más unidades de un producto.
   quantities.value[index] += 1;
 };
-
+//decreaseQuantity: Reduce la cantidad del producto en la posición index, 
 const decreaseQuantity = (index: number) => {
+  //pero solo si la cantidad es mayor a 1. Evita que el valor llegue a 0 o menos.
   if (quantities.value[index] > 1) {
     quantities.value[index] -= 1;
   }
 };
-
+//subtotal: Calcula el total del carrito antes de impuestos. 
+//Usa reduce para sumar el precio de cada producto multiplicado por la cantidad asociada en quantities.
+// Es una propiedad computada, lo que significa que se recalcula automáticamente cuando cambian las cantidades o los productos.
 const subtotal = computed(() => {
   return cartItems.reduce((acc, item, index) => acc + item.price * quantities.value[index], 0);
 });
-
+//tax: Calcula el 18% del subtotal como impuesto (IGV en algunos países)
 const tax = computed(() => subtotal.value * 0.18);
-
+//total: Suma el subtotal y los impuestos para obtener el total final a pagar
 const total = computed(() => subtotal.value + tax.value);
-
+//removeItem: Elimina un producto del carrito (array cartItems) usando splice, que quita el producto en la posición index.
 const removeItem = (index: number) => {
   cartItems.splice(index, 1); // Eliminar el item del array de productos
   quantities.value.splice(index, 1); // Eliminar la cantidad asociada
 };
 
 // Lógica para el modal de pago
-const isPaymentModalOpen = ref(false);
-
+//isPaymentModalOpen: Una variable reactiva que controla si el modal de pago está abierto o cerrado.
+const isPaymentModalOpen = ref(false);// Inicia como false, lo que indica que el modal está cerrado.
+//openPaymentModal: Cambia isPaymentModalOpen a true, lo que abre el modal de pago.
 const openPaymentModal = () => {
   isPaymentModalOpen.value = true;
 };
-
+//closePaymentModal: Cambia isPaymentModalOpen a false, lo que cierra el modal.
 const closePaymentModal = () => {
   isPaymentModalOpen.value = false;
 };
-
+//handlePaymentSubmit: Esta función maneja los datos del pago (que se reciben como paymentData).
 const handlePaymentSubmit = (paymentData: any) => {
   // Aquí puedes manejar los datos del pago
   console.log('Datos de pago recibidos:', paymentData);
   // Implementa la lógica para procesar el pago
   // Por ejemplo, puedes enviar los datos a tu backend
   // y luego limpiar el carrito si el pago es exitoso
+  //Aquí podrías implementar la lógica para procesar el pago, 
+  //como enviar la información al backend y limpiar el carrito si el pago es exitoso.
   closePaymentModal();
 };
 </script>

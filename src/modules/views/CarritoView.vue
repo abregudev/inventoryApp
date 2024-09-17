@@ -22,21 +22,26 @@
 </template>
 
 <script lang="ts" setup>
+//Se importad evue para crear proipedades computadas reacctivas
+//Watch se importa para observar cambios en las propiedades reactivas y ejecutar lògica cuando estos cambios ocurren 
 import { computed, watch } from 'vue';
+//se importa desde el archivo CartStores que contiene la lògica del carrito de compras 
 import { useCartStore } from '../stores/CartStores';
-
+//se llama la funciòn useCartStore() para acceder al estado global del carrito
 const cartStore = useCartStore();
 
-// Computed property to get the total items in the cart
+//Esto crea una propiedad computada que calcula el numero total de articulos en el carrito
 const totalItems = computed(() => {
+  //aquì se usa el mètodo reduce para sumar todas las cantidades de los productos en el carrito
+  //la funcion reduce toma dos argumentos : total-> acumula la cantidad de los productos  y item.quantity-> la cantidad de cada producto en el carrito
   return cartStore.cart.reduce((total, item) => total + item.quantity, 0);
 });
-// Watcher to detect changes in the cart and update the view
+//Esta observando el array cartStore.cart cada vez que el carrito del contenido cambia la funcion se ejecuta
 watch(() => cartStore.cart, () => {
+  //cuando detecta un cambio imprime en console indicando que el carrito a sido modificado
   console.log('El carrito ha sido actualizado:', cartStore.cart);
 });
-
-// Logging for debugging
+// Registro para depurar
 //console.log('Desde carrito de compras');
 
 </script>

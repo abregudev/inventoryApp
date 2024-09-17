@@ -30,11 +30,14 @@
 </template>
 
 <script setup lang="ts">
+//Importas el hook onMounted este hook se ejecuta cuandnoe l componente ha sido completamente montado en el DOM 
 import { onMounted } from 'vue';
+//importas un componente desde la carpeta inventario 
 import CategoryProducts from '../components/Inventario/CategoryProducts.vue';
+//Importas un componente llamado cardProducts 
 import CardProducts from '../components/Inventario/CardProducts.vue';
-//import CartBuy from '../components/carrito/CartBuy.vue';
-
+//Dentro del onMounted has agregado una funciòn que ejecuta conole.log(), 
+//lo que indica que cada vez que el componente sea montado en el DOM mensaje imprimira en consola
 onMounted(() => {
   console.log('Vista de inventario montada');
 });
