@@ -197,7 +197,7 @@ const submitProduct = async () => {
 
   const productData = {
     ...producto.value,
-    nuevoStock: nuevoStock.value
+    stock: isEditMode.value ? producto.value.stock + Number(nuevoStock.value) : Number(nuevoStock.value)
   }
 
   const url = isEditMode.value

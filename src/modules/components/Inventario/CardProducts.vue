@@ -18,7 +18,7 @@
           </button>
         </div>
         <div class="p-4">
-          <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.code }}</h3>
+          <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.description }}</h3>
           <p class="text-sm text-gray-600 mb-2">Código: {{ product.code }}</p>
           <div class="flex justify-between items-center mb-4">
             <span class="text-xl font-bold text-blue-600">${{ formatPrice(product.price) }}</span>
