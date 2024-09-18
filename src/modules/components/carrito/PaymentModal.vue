@@ -13,7 +13,7 @@
             <input
               type="text"
               id="nombres"
-              v-model="formData.nombres"
+              v-model="customerData.fullname"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -24,7 +24,7 @@
             <input
               type="text"
               id="dni"
-              v-model="formData.dni"
+              v-model="customerData.dni"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -35,7 +35,7 @@
             <input
               type="tel"
               id="telefono"
-              v-model="formData.telefono"
+              v-model="customerData.phone"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -46,7 +46,7 @@
             <input
               type="text"
               id="ruc"
-              v-model="formData.ruc"
+              v-model="customerData.ruc"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
           </div>
@@ -56,7 +56,7 @@
               >Método de Pago</label>
             <select
               id="metodoPago"
-              v-model="formData.metodoPago"
+              v-model="paymentData.metodoPago"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
@@ -66,7 +66,7 @@
             </select>
           </div>
 
-          <div v-if="formData.metodoPago !== 'efectivo'">
+          <div v-if="paymentData.metodoPago !== 'efectivo'">
             <label for="comprobante" class="block text-sm font-medium text-gray-700"
               >Subir Comprobante</label
             >
@@ -100,30 +100,66 @@
 </template>
 
 <script setup lang="ts">
+import { useCartStore } from '@/modules/stores/CartStores';
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
+const cartStore = useCartStore()
+cartStore.loadCartFromLocalStorage();
+
+// Usa storeToRefs para obtener una referencia reactiva al carrito
+const { cart } = storeToRefs(cartStore);
 
 const props = defineProps<{
   isOpen: boolean;
 }>();
 
-const formData = ref({
-  nombres: '',
+const customerData = ref({
+  fullname: '',
   dni: '',
-  telefono: '',
+  phone: '',
   ruc: '',
+});
+
+const paymentData = ref({
   metodoPago: 'transferencia',
   comprobante: null as File | null,
-});
+})
 
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    formData.value.comprobante = target.files[0];
+    paymentData.value.comprobante = target.files[0];
   }
 };
 
-const enviarFormulario = () => {
-  console.log('Datos del formulario:', formData.value);
-};
+const enviarFormulario = async () => {
+  console.log('Datos del formulario:', customerData.value);
+
+  const salesData = {
+    customer:{
+      ...customerData.value,
+    },
+    products: cart.value.map(item => ({
+      id: item.id,
+      image: item.image,
+      code: item.code,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      stock: item.stock,
+      quantity: item.quantity
+    })),
+    payment:{
+      ...paymentData.value,
+    }
+  }
+
+ 
+
+  };
+  
 
 </script>

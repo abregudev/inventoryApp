@@ -80,7 +80,7 @@ export const useCartStore = defineStore('cart', () => {
   //llama a la funciòn para inmediatamente cargaar el estado del carrito desde el localStorage cuando se inicializa la tienda
   loadCartFromLocalStorage();
   //retorna las propiedades y funciones que podràn ser utilizadas fuera de la tienda
-  return { cart, addToCart, clearCart, getTotalItems, clearItemCart, decreaseQuantity };
+  return { cart, addToCart, clearCart, getTotalItems, clearItemCart, decreaseQuantity, loadCartFromLocalStorage };
   //cart-> el carrito actual
   //addToCart -> funcion para agregar un poroducto al carrito
   // clearCart -> Funciòn para limpiar el carrito

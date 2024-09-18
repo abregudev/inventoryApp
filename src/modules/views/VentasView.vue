@@ -127,8 +127,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+<script lang="ts" setup>
+
+import { defineComponent, ref, computed, onMounted } from 'vue'
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
 
 interface Venta {
   id: number;
@@ -140,81 +143,33 @@ interface Venta {
   metodoPago: string;
 }
 
-export default defineComponent({
-  name: 'RegistroVentas',
-  setup() {
-    const ventasOriginal = ref<Venta[]>([
-      { id: 1, fecha: '22/08/2024', cliente: 'Wikdke', dni: 'lekdd', ruc: 'ldidd', total: 'S/ 201.00', metodoPago: 'efectivo' },
-      { id: 2, fecha: '22/08/2024', cliente: 'Sebastian Rodrigo Abregu Aguilera', dni: '70214182', ruc: '213131313', total: 'S/ 90.00', metodoPago: 'efectivo' },
-      { id: 3, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'transferencia' },
-      { id: 4, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'yape' },
-      { id: 5, fecha: '22/08/2024', cliente: 'ruben campo', dni: '123132', ruc: '213213', total: 'S/ 180.00', metodoPago: 'yape' },
-    ])
 
-    const searchTerm = ref('')
-    const selectedDate = ref('')
+const listSales = async()=>{
+  fetch(`${baseUrl}/sales/list-sales/`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
 
-    const ventas = computed(() => {
-      return ventasOriginal.value.filter(venta => {
-        const matchSearch = searchTerm.value === '' || 
-          venta.cliente.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-          venta.dni.includes(searchTerm.value) ||
-          venta.ruc.includes(searchTerm.value)
-        
-        const matchDate = selectedDate.value === '' || venta.fecha === selectedDate.value
-
-        return matchSearch && matchDate
-      })
-    })
-
-    const isModalOpen = ref(false)
-    const selectedVenta = ref<Venta | null>(null)
-
-    const metodoPagoClase = (metodo: string): string => {
-      switch (metodo) {
-        case 'yape':
-          return 'bg-purple-100 text-purple-800';
-        case 'efectivo':
-          return 'bg-green-100 text-green-800';
-        case 'transferencia':
-          return 'bg-blue-100 text-blue-800';
-        default:
-          return 'bg-gray-100 text-gray-800';
-      }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Error en la solicitud');
     }
 
-    const verDetalles = (venta: Venta) => {
-      selectedVenta.value = venta;
-      isModalOpen.value = true;
-    }
+    console.log("**************************")
+    console.log(response.json());
 
-    const closeModal = () => {
-      isModalOpen.value = false;
-      selectedVenta.value = null;
-    }
+  })
+}
 
-    const verComprobante = () => {
-      console.log('Ver comprobante');
-      // Implementar lógica para ver el comprobante
-    }
-
-    const descargarComprobante = () => {
-      console.log('Descargar comprobante');
-      // Implementar lógica para descargar el comprobante
-    }
-
-    return {
-      ventas,
-      searchTerm,
-      selectedDate,
-      metodoPagoClase,
-      verDetalles,
-      isModalOpen,
-      selectedVenta,
-      closeModal,
-      verComprobante,
-      descargarComprobante
-    }
-  }
+onMounted(()=>{
+  listSales();
 })
+
+
+
+
+
+
 </script>

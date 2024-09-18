@@ -68,7 +68,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, onMounted } from 'vue';
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
 
 const props = defineProps<{
   isOpen: boolean;
@@ -89,6 +91,8 @@ const props = defineProps<{
   };
 }>();
 
+
+
 const emit = defineEmits(['close', 'verComprobante', 'descargarComprobante']);
 
 const closeModal = () => {
@@ -102,4 +106,6 @@ const verComprobante = () => {
 const descargarComprobante = () => {
   emit('descargarComprobante');
 };
+
+
 </script>

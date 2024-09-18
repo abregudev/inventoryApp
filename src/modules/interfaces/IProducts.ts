@@ -7,6 +7,7 @@ export default interface IProduct {
     stock: number;
     category: string;
     image: string;
+    description: string;
     // quantity: number;
     // thumbnail: string;
 }
