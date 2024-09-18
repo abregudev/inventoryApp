@@ -10,7 +10,7 @@
         class="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
       >
         <div class="relative">
-          <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" />
+          <img :src="product.image" :alt="product.code" class="w-full h-48 object-cover" />
           <button class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -18,7 +18,7 @@
           </button>
         </div>
         <div class="p-4">
-          <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.description || 'Sin descripción disponible' }}</h3>
+          <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.code }}</h3>
           <p class="text-sm text-gray-600 mb-2">Código: {{ product.code }}</p>
           <div class="flex justify-between items-center mb-4">
             <span class="text-xl font-bold text-blue-600">${{ formatPrice(product.price) }}</span>
@@ -95,14 +95,7 @@ const fetchProducts = async (): Promise<void> => {
     const data = await response.json();
     console.log('Datos recibidos:', data);
     if (Array.isArray(data)) {
-      products.value = data.map(product => ({
-        ...product,
-        name: product.name || product.code || 'Producto sin nombre',
-        description: product.description || 'Sin descripción disponible',
-        options: Array.isArray(product.options) ? product.options : [],
-        price: product.price || 0,
-        stock: product.stock || 0
-      }));
+      products.value = data;
       console.log('Productos procesados:', products.value);
     } else {
       throw new Error('Los datos recibidos no son un array');
@@ -123,7 +116,6 @@ onMounted(() => {
 const addToCart = (product: IProduct) => {
   if (isInStock(product.stock)) {
     cartStore.addToCart(product);
-    console.log(`${product.name || product.code} ha sido agregado al carrito.`);
   }
 };
 </script>
