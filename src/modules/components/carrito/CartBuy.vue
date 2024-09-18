@@ -26,8 +26,9 @@
           >
             -
           </button>
-
+          
           <span class="bg-gray-100 px-4 py-1">{{ quantities[index] }}</span>
+
           <button
             @click="increaseQuantity(index)"
             class="bg-gray-200 text-gray-800 px-2 py-1 rounded-r-md hover:bg-gray-300 transition duration-200"
@@ -97,36 +98,62 @@ import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea 
 //cartStore: Creas una instancia del store del carrito, lo que te permite interactuar con los datos del carrito.
 const cartStore = useCartStore();
 //cartItems: Almacenas el carrito de compras (cartStore.cart) en una variable para poder acceder y modificar los productos.
-let cartItems = cartStore.cart;
+const cartItems = ref(cartStore.cart);
 //quantities: Es una variable reactiva que almacena la cantidad de cada producto en el carrito.
 // Variable reactiva para almacenar la cantidad de cada producto
-const quantities = ref<number[]>(cartItems.map((item) => item.quantity));
-//increaseQuantity: Aumenta la cantidad del producto en la posición index dentro del array quantities
-const increaseQuantity = (index: number) => {
-  //Esto es útil cuando el usuario hace clic para agregar más unidades de un producto.
-  quantities.value[index] += 1;
+
+// const quantities = ref<number[]>(cartItems.map((item) => item.quantity));
+// Computed para obtener las cantidades
+const quantities = computed(() => cartItems.value.map(item => item.quantity));
+
+
+// Función para actualizar el carrito local desde el store
+const updateCart = () => {
+  cartItems.value = [...cartStore.cart];
 };
-//decreaseQuantity: Reduce la cantidad del producto en la posición index,
-const decreaseQuantity = (index: number) => {
-  //pero solo si la cantidad es mayor a 1. Evita que el valor llegue a 0 o menos.
-  if (quantities.value[index] > 1) {
-    quantities.value[index] -= 1;
+
+
+//increaseQuantity: Aumenta la cantidad del producto en la posición index dentro del array quantities
+// Aumenta la cantidad del producto
+const increaseQuantity = (index: number) => {
+  if (index >= 0 && index < cartItems.value.length) {
+    const product = cartItems.value[index];
+    cartStore.addToCart(product);
+    updateCart();
   }
 };
+
+//decreaseQuantity: Reduce la cantidad del producto en la posición index,
+const decreaseQuantity = (index: number) => {
+  if (index >= 0 && index < cartItems.value.length) {
+    const product = cartItems.value[index];
+    if (product.quantity > 1) {
+      quantities.value[index] -= 1;
+      cartStore.decreaseQuantity(product)
+    }
+    updateCart();
+  }
+};
+
+
 //subtotal: Calcula el total del carrito antes de impuestos.
 //Usa reduce para sumar el precio de cada producto multiplicado por la cantidad asociada en quantities.
 // Es una propiedad computada, lo que significa que se recalcula automáticamente cuando cambian las cantidades o los productos.
 const subtotal = computed(() => {
-  return cartItems.reduce((acc, item, index) => acc + item.price * quantities.value[index], 0);
+  return cartItems.value.reduce((acc, item) => acc + item.price * item.quantity, 0);
 });
+
 //tax: Calcula el 18% del subtotal como impuesto (IGV en algunos países)
 const tax = computed(() => subtotal.value * 0.18);
 //total: Suma el subtotal y los impuestos para obtener el total final a pagar
 const total = computed(() => subtotal.value + tax.value);
 //removeItem: Elimina un producto del carrito (array cartItems) usando splice, que quita el producto en la posición index.
 const removeItem = (index: number) => {
-  cartItems.splice(index, 1); // Eliminar el item del array de productos
-  quantities.value.splice(index, 1); // Eliminar la cantidad asociada
+  if (index >= 0 && index < cartItems.value.length) {
+    const product = cartItems.value[index];
+    cartStore.clearItemCart(product.id);
+    updateCart();
+  }
 };
 
 // Lógica para el modal de pago
@@ -155,37 +182,21 @@ const handlePaymentSubmit = (paymentData: any) => {
 //GUARDAR CARRITO EN LOCALSTORAGE
 //watch es una función que observa cambios en las variables.
 watch(
-  //esta observando estas dos variables cartItems, quantities cuando algo cambia aqui
-  [cartItems, quantities],
-  //se ejecuta esta funcion 
-  //newCartItems contiene la nueva lista de productos del carrito.
-  //newQuantities contiene las nuevas cantidades asociadas a los productos.
-  ([newCartItems, newQuantities]) => {
-    //guarda los productos en localstoage y convierte la lista de productos en un formato que puede ser guardado como texto
+  cartItems,
+  (newCartItems) => {
     localStorage.setItem('cart', JSON.stringify(newCartItems));
-    //cart y quantities es la clave que usamos para guardar esta informaciòn
-    localStorage.setItem('quantities', JSON.stringify(newQuantities));
   },
-  //Le decimos a vue que observe los cambios de forma profunda es decir si algo cambia dentro de cartItems o quantities tambien detecte los cambios
-  { deep: true },
+  { deep: true }
 );
 
 //RECUPERAR CARRITO DE LOCALSTORAGE recupera el carrito y las cantidades cuando la pagina se carga o recarga
 //esta funcion se ejecuta cuando el componente termina de cargarse es decir cuando esta lista
 onMounted(() => {
-  //Aqui tratamos de recuperar los productos del carrito q guardamos en el localStorage
-  //busca en memoria del navegador los datos guardados con la clave 'cart'
   const savedCart = localStorage.getItem('cart');
-  const savedQuantities = localStorage.getItem('quantities');
-
-  //Si ambos existen entramos al bloque de codigo
-  if (savedCart && savedQuantities) {
-    //convierte el texto que estaba guardado en localStorage devuelta a un formato de lista
-    //asignamos esta lista a cartItems lo q restaura los productos en el carrito
-    cartItems = JSON.parse(savedCart);
-    //Aquì restauramos las cantidades de productos 
-    //quantities.value es donde se almacena las cantidades y lo asignamos datos recuperados desde localStorage
-    quantities.value = JSON.parse(savedQuantities);
+  if (savedCart) {
+    const parsedCart = JSON.parse(savedCart);
+    cartStore.$patch({ cart: parsedCart });
+    updateCart();
   }
 });
 </script>
