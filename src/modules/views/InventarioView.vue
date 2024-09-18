@@ -1,29 +1,95 @@
 <template>
-  <section class="bg-gray-100 min-h-screen py-8">
+  <section class=" from-blue-50 to-indigo-100 min-h-screen py-8">
     <div class="container mx-auto px-4">
-      <h1 class="text-3xl font-bold text-gray-800 mb-8">Inventario</h1>
-      <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Columna izquierda: Categorías -->
-        <div class="lg:w-1/4 lg:max-w-xs">
-          <div class="sticky top-8">
-            <CategoryProducts />
+      <h1 class="text-4xl font-bold text-indigo-800 mb-8 text-center">Inventario</h1>
+      
+      <div class="mb-6 relative">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Buscar productos..."
+          class="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        <button class="absolute right-3 top-2 text-indigo-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="mb-6">
+        <button @click="toggleCategories" class="flex items-center justify-between w-full bg-white px-4 py-2 rounded-lg shadow-md hover:bg-indigo-50 transition duration-300">
+          <span class="font-semibold text-indigo-700">Categorías</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" :class="{ 'transform rotate-180': showCategories }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div v-if="showCategories" class="mt-2 bg-white p-4 rounded-lg shadow-lg">
+          <div class="flex flex-wrap gap-2">
+            <button 
+              @click="selectCategory('')"
+              class="px-3 py-1 rounded-full text-sm transition duration-300"
+              :class="selectedCategory === '' ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'"
+            >
+              Todas
+            </button>
+            <button 
+              v-for="category in categories" 
+              :key="category"
+              @click="selectCategory(category)"
+              class="px-3 py-1 rounded-full text-sm transition duration-300"
+              :class="selectedCategory === category ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'"
+            >
+              {{ category }}
+            </button>
           </div>
         </div>
-        <!-- Columna derecha: Productos -->
-        <div class="lg:w-3/4">
-          <CardProducts />
-        </div>
       </div>
+
+      <CardProducts 
+        :searchQuery="searchQuery" 
+        :selectedCategory="selectedCategory"
+        @update-categories="updateCategories"
+      />
     </div>
+
+    <RouterLink to="/cart" class="fixed bottom-10 right-10 bg-indigo-600 text-white rounded-full p-3 shadow-lg z-10 hover:bg-indigo-700 transition duration-300">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <span 
+        v-if="totalQuantity > 0"
+        class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+        {{ totalQuantity }}
+      </span>
+    </RouterLink>
   </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import CategoryProducts from '../components/Inventario/CategoryProducts.vue';
+import { ref, computed } from 'vue';
 import CardProducts from '../components/Inventario/CardProducts.vue';
+import { useCartStore } from '../stores/CartStores';
 
-onMounted(() => {
-  console.log('Vista de inventario montada');
+const cartStore = useCartStore();
+const searchQuery = ref('');
+const showCategories = ref(false);
+const selectedCategory = ref('');
+const categories = ref<string[]>([]);
+
+const totalQuantity = computed(() => {
+  return cartStore.cart.reduce((sum, item) => sum + item.quantity, 0);
 });
+
+const toggleCategories = () => {
+  showCategories.value = !showCategories.value;
+};
+
+const selectCategory = (category: string) => {
+  selectedCategory.value = category;
+};
+
+const updateCategories = (newCategories: string[]) => {
+  categories.value = newCategories;
+};
 </script>
