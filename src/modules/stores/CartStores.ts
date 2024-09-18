@@ -36,6 +36,7 @@ export const useCartStore = defineStore('cart', () => {
     //cart.value hace referencia al carrito de compras 
     //find es un metodo que busca dentro de un array el primer elemento
     //item => item.id === product.id: Esta es la condición de búsqueda. Compara el id de cada item con el id del product que estamos intentando agregar.
+
     const existingItem = cart.value.find(item => item.id === product.id);//si encuentra un producto con el mismo id lo devuelve y lo guarda en existingItem
     //Aquì se verifica si el producto ya existe en el carrito
     if (existingItem) {
@@ -56,10 +57,17 @@ export const useCartStore = defineStore('cart', () => {
     cart.value = [];
     saveCartToLocalStorage();//guarda el estado vacio en el local storage
   };
+
+  const clearItemCart = (id: number) => {
+    cart.value = cart.value.filter(item => item.id !== id);
+    console.log(cart.value)
+    saveCartToLocalStorage();//guarda el estado vacio en el local storage
+  };
+
   //llama a la funciòn para inmediatamente cargaar el estado del carrito desde el localStorage cuando se inicializa la tienda
   loadCartFromLocalStorage();
   //retorna las propiedades y funciones que podràn ser utilizadas fuera de la tienda
-  return { cart, addToCart, clearCart, getTotalItems };
+  return { cart, addToCart, clearCart, getTotalItems, clearItemCart };
   //cart-> el carrito actual
   //addToCart -> funcion para agregar un poroducto al carrito
   // clearCart -> Funciòn para limpiar el carrito

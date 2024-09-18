@@ -39,6 +39,9 @@ const codeSubmit = () => {
   //${baseUrl}/products/search-code/${code.value}/: Es la URL completa de la API, donde code.value es el código que el usuario ha ingresado. 
   fetch(`${baseUrl}/products/search-code/${code.value}/`, {
     method: 'GET',// se usa el método GET para obtener información del servidor.
+    headers: {
+        'Content-Type': 'application/json'
+      },
   })
   //.then(response => {}): Aquí manejas la respuesta de la API. Si todo sale bien, conviertes la respuesta a formato JSON.
   .then(response => {

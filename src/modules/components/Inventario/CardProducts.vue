@@ -58,6 +58,7 @@ onMounted(() => {
   //Así te aseguras de que los productos se carguen automáticamente al abrir la página.
   fetchProducts();
 });
+
 //addToCart: Esta función recibe un producto como parámetro y lo agrega al carrito usando la función addToCart del cartStore.
 const addToCart = (product: IProduct) => {
   //Llama a la función addToCart del store, lo que actualiza el estado del carrito de compras y almacena el producto seleccionado.
@@ -65,4 +66,5 @@ const addToCart = (product: IProduct) => {
   // console.log(`${product.title} ha sido agregado al carrito.`);
   // console.log('Productos en el carrito: ', cartStore.cart);
 };
+
 </script>

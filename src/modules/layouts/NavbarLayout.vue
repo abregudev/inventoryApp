@@ -131,7 +131,7 @@ const cartStore = useCartStore(); // Instancia el store del carrito
 const totalQuantity = computed(() => { // Computa la cantidad total de productos en el carrito
   return cartStore.cart.reduce((sum, item) => sum + item.quantity, 0);
 });
-console.log(totalQuantity)
+
 const isMenuOpen = ref(false);//isMenuOpen: Es una variable reactiva que indica si el menú está abierto o cerrado.
 const toggleMenu = () => {//toggleMenu: Es una función que cambia el estado del menú
   //Esta línea invierte el valor actual, permitiendo abrir o cerrar el menú cada vez que se llama a la función.
