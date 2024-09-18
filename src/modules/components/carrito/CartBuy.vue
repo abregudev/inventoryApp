@@ -129,6 +129,7 @@ const decreaseQuantity = (index: number) => {
     const product = cartItems.value[index];
     if (product.quantity > 1) {
       quantities.value[index] -= 1;
+      cartStore.decreaseQuantity(product)
     }
     updateCart();
   }

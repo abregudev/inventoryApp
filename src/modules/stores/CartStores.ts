@@ -48,6 +48,19 @@ export const useCartStore = defineStore('cart', () => {
     saveCartToLocalStorage();
   };
 
+  // Reduce la cantidad del producto
+  const decreaseQuantity = (product: IProduct) => {
+    const existingItem = cart.value.find(item => item.id === product.id);
+    if (existingItem) {
+      if (existingItem.quantity > 1) {
+        existingItem.quantity -= 1;
+      } else {
+        clearItemCart(product.id);
+      }
+      saveCartToLocalStorage();
+    }
+  };
+
   //creamos una funciòn en la cual se utiliza reduce para sumar las cantidades de todos los productos en el carrito y retorna el numero total de productos
   const getTotalItems = () => {
     return cart.value.reduce((total, item) => total + (item.quantity || 0), 0);
@@ -67,7 +80,7 @@ export const useCartStore = defineStore('cart', () => {
   //llama a la funciòn para inmediatamente cargaar el estado del carrito desde el localStorage cuando se inicializa la tienda
   loadCartFromLocalStorage();
   //retorna las propiedades y funciones que podràn ser utilizadas fuera de la tienda
-  return { cart, addToCart, clearCart, getTotalItems, clearItemCart };
+  return { cart, addToCart, clearCart, getTotalItems, clearItemCart, decreaseQuantity };
   //cart-> el carrito actual
   //addToCart -> funcion para agregar un poroducto al carrito
   // clearCart -> Funciòn para limpiar el carrito
