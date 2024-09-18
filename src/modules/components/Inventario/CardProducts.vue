@@ -1,22 +1,44 @@
 <template>
-  <div class="flex justify-center py-8">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="container mx-auto px-4 py-8">
+    <div v-if="loading">Cargando productos...</div>
+    <div v-else-if="error">Error: {{ error }}</div>
+    <div v-else-if="products.length === 0">No se encontraron productos.</div>
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div
         v-for="product in products"
         :key="product.id"
-        class="shadow rounded-lg overflow-hidden"
+        class="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
       >
-        <img :src="product.image" alt="producto" class="h-48 object-cover" />
-        <div class="p-4">
-          <h3 class="font-bold text-lg mb-2">{{ product.code }}</h3>
-          <p class="text-gray-600">Precio: ${{ product.price }}</p>
-          <p class="text-gray-600 mt-2">Stock: {{ product.stock }}</p>
-          <button
-            @click="addToCart(product)"
-            class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add to Cart 
+        <div class="relative">
+          <img :src="product.image" :alt="product.name" class="w-full h-48 object-cover" />
+          <button class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
           </button>
+        </div>
+        <div class="p-4">
+          <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.description || 'Sin descripción disponible' }}</h3>
+          <p class="text-sm text-gray-600 mb-2">Código: {{ product.code }}</p>
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-xl font-bold text-blue-600">${{ formatPrice(product.price) }}</span>
+            <span :class="['px-2 py-1 rounded-full text-xs font-bold', getStockClass(product.stock)]">
+              {{ getStockLabel(product.stock) }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-500">Stock: {{ product.stock }}</span>
+            <button
+              @click="addToCart(product)"
+              :disabled="!isInStock(product.stock)"
+              class="flex items-center justify-center bg-blue-500 text-white px-3 py-1 rounded-full text-sm hover:bg-blue-600 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {{ isInStock(product.stock) ? 'Agregar' : 'Agotado' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -24,47 +46,84 @@
 </template>
 
 <script lang="ts" setup>
-//importas la interface IProduct que define la estructura de un producto 
 import type IProduct from '@/modules/interfaces/IProducts';
-//useCartStore: Importa el store de carrito de compras (usando Pinia) desde CartStores
 import { useCartStore } from '@/modules/stores/CartStores';
-//computed, onMounted, ref: Importas las funciones reactivas de Vue
-import { onMounted, ref } from 'vue'; 
+import { onMounted, ref } from 'vue';
+
 const baseUrl = import.meta.env.VITE_BASE_URL;
-
-
-
 const cartStore = useCartStore();
-// Variable reactiva para almacenar los productos
 const products = ref<IProduct[]>([]);
-// Computed para limitar a 2 productos
-// const limitedProducts = computed(() => products.value.slice(0, 6));
+const loading = ref(true);
+const error = ref<string | null>(null);
+
+const formatPrice = (price: any): string => {
+  const numPrice = Number(price);
+  return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
+};
+
+const getStockClass = (stock: any): string => {
+  const numStock = Number(stock);
+  if (isNaN(numStock)) return 'bg-gray-100 text-gray-800';
+  if (numStock > 10) return 'bg-green-100 text-green-800';
+  if (numStock > 0) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-red-100 text-red-800';
+};
+
+const getStockLabel = (stock: any): string => {
+  const numStock = Number(stock);
+  if (isNaN(numStock)) return 'Stock desconocido';
+  if (numStock > 10) return 'En stock';
+  if (numStock > 0) return 'Pocas unidades';
+  return 'Agotado';
+};
+
+const isInStock = (stock: any): boolean => {
+  const numStock = Number(stock);
+  return !isNaN(numStock) && numStock > 0;
+};
 
 const fetchProducts = async (): Promise<void> => {
-  //try  intenta ejecutar el codigo
+  loading.value = true;
+  error.value = null;
   try {
-
+    console.log('Iniciando fetchProducts. URL:', `${baseUrl}/products/list-products/`);
     const response = await fetch(`${baseUrl}/products/list-products/`);
+    console.log('Respuesta recibida. Status:', response.status);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     const data = await response.json();
-    console.log(data)
-    //console.log(data);
-    products.value = data; // Accede a la propiedad "products"
-  } catch (error) {
-    console.error('Error al cargar los productos:', error);
+    console.log('Datos recibidos:', data);
+    if (Array.isArray(data)) {
+      products.value = data.map(product => ({
+        ...product,
+        name: product.name || product.code || 'Producto sin nombre',
+        description: product.description || 'Sin descripción disponible',
+        options: Array.isArray(product.options) ? product.options : [],
+        price: product.price || 0,
+        stock: product.stock || 0
+      }));
+      console.log('Productos procesados:', products.value);
+    } else {
+      throw new Error('Los datos recibidos no son un array');
+    }
+  } catch (e) {
+    console.error('Error al cargar los productos:', e);
+    error.value = e instanceof Error ? e.message : 'Error desconocido';
+  } finally {
+    loading.value = false;
   }
 };
-//onMounted: Este hook de Vue ejecuta la función fetchProducts cuando el componente ha sido montado en el DOM. 
+
 onMounted(() => {
-  //Así te aseguras de que los productos se carguen automáticamente al abrir la página.
+  console.log('Componente montado, iniciando fetchProducts');
   fetchProducts();
 });
 
-//addToCart: Esta función recibe un producto como parámetro y lo agrega al carrito usando la función addToCart del cartStore.
 const addToCart = (product: IProduct) => {
-  //Llama a la función addToCart del store, lo que actualiza el estado del carrito de compras y almacena el producto seleccionado.
-  cartStore.addToCart(product);
-  // console.log(`${product.title} ha sido agregado al carrito.`);
-  // console.log('Productos en el carrito: ', cartStore.cart);
+  if (isInStock(product.stock)) {
+    cartStore.addToCart(product);
+    console.log(`${product.name || product.code} ha sido agregado al carrito.`);
+  }
 };
-
 </script>
