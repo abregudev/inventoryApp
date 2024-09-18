@@ -4,9 +4,9 @@
       <div class="flex items-center justify-between">
         <!-- Logo -->
         <div class="flex-shrink-0">
-          <RouterLink to="/">
+          <RouterLink to="/home">
             <img
-              class="h-12 w-auto"
+              class="h-10 w-auto"
               src="https://i.postimg.cc/ZKJnSw77/inventory-high-resolution-logo-black-transparent.png"
               alt="Inventory"
             />
