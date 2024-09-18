@@ -82,16 +82,13 @@
         <div class="mt-6 flex justify-end space-x-3">
           <button
             type="button"
-            
-            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
-          >
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
             Cancelar
           </button>
           <button
             type="submit"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-          >
-          Enviar
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+            Enviar
           </button>
         </div>
       </form>
@@ -100,29 +97,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue';//permite hacer que ciertos valores sean reactivos que significa si cambia el valor ref la aplicaciòn se darà cuenta y modificarà automaticamente
 
-const props = defineProps<{
+const props = defineProps<{ //este codigo dice voy a recibir una propiedad llamda isOPen, las props son como mensajes o datos que un componente puede recibir desde su papà
   isOpen: boolean;
 }>();
 
-const formData = ref({
+const formData = ref({ //Aquì estamos creando una cajita llamada formData donde vamos a guardar toda la informaciòn que el usuario escriba en el formulario
   nombres: '',
   dni: '',
   telefono: '',
   ruc: '',
   metodoPago: 'transferencia',
-  comprobante: null as File | null,
+  comprobante: null as File | null,//aqui vamos a guardar un archivo como un recibo o comprobante cuando la persona suba o no
 });
 
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = (event: Event) => { //Esta funciòn es para manejar cuando alguien sube el archivo como una foto o un pdf, toma el archivo y lo guarda en nuetra cajita fromData
   const target = event.target as HTMLInputElement;
   if (target.files) {
     formData.value.comprobante = target.files[0];
   }
 };
 
-const enviarFormulario = () => {
+const enviarFormulario = () => { //Esta funciòn se llama cuando la persona termina de llenar el formulario y lo quiere enviar 
   console.log('Datos del formulario:', formData.value);
 };
 
