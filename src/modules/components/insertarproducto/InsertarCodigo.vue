@@ -134,7 +134,6 @@ const searchProduct = async () => {
     alert('Por favor, ingrese un código de producto.')
     return
   }
-
   try {
     const response = await fetch(`${baseUrl}/products/search-code/${searchCode.value}/`)
     if (response.ok) {
