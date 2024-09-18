@@ -13,7 +13,7 @@
             <input
               type="text"
               id="nombres"
-              v-model="formData.nombres"
+              v-model="customerData.fullname"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -24,7 +24,7 @@
             <input
               type="text"
               id="dni"
-              v-model="formData.dni"
+              v-model="customerData.dni"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -35,7 +35,7 @@
             <input
               type="tel"
               id="telefono"
-              v-model="formData.telefono"
+              v-model="customerData.phone"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -46,7 +46,7 @@
             <input
               type="text"
               id="ruc"
-              v-model="formData.ruc"
+              v-model="customerData.ruc"
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
           </div>
@@ -56,7 +56,7 @@
               >Método de Pago</label>
             <select
               id="metodoPago"
-              v-model="formData.metodoPago"
+              v-model="paymentData.metodoPago"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
@@ -66,7 +66,7 @@
             </select>
           </div>
 
-          <div v-if="formData.metodoPago !== 'efectivo'">
+          <div v-if="paymentData.metodoPago !== 'efectivo'">
             <label for="comprobante" class="block text-sm font-medium text-gray-700"
               >Subir Comprobante</label
             >
@@ -97,30 +97,66 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';//permite hacer que ciertos valores sean reactivos que significa si cambia el valor ref la aplicaciòn se darà cuenta y modificarà automaticamente
+import { useCartStore } from '@/modules/stores/CartStores';
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
+const cartStore = useCartStore()
+cartStore.loadCartFromLocalStorage();
+
+// Usa storeToRefs para obtener una referencia reactiva al carrito
+const { cart } = storeToRefs(cartStore);
 
 const props = defineProps<{ //este codigo dice voy a recibir una propiedad llamda isOPen, las props son como mensajes o datos que un componente puede recibir desde su papà
   isOpen: boolean;
 }>();
 
-const formData = ref({ //Aquì estamos creando una cajita llamada formData donde vamos a guardar toda la informaciòn que el usuario escriba en el formulario
-  nombres: '',
+const customerData = ref({
+  fullname: '',
   dni: '',
-  telefono: '',
+  phone: '',
   ruc: '',
-  metodoPago: 'transferencia',
-  comprobante: null as File | null,//aqui vamos a guardar un archivo como un recibo o comprobante cuando la persona suba o no
 });
+
+const paymentData = ref({
+  metodoPago: 'transferencia',
+  comprobante: null as File | null,
+})
 
 const handleFileUpload = (event: Event) => { //Esta funciòn es para manejar cuando alguien sube el archivo como una foto o un pdf, toma el archivo y lo guarda en nuetra cajita fromData
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    formData.value.comprobante = target.files[0];
+    paymentData.value.comprobante = target.files[0];
   }
 };
 
-const enviarFormulario = () => { //Esta funciòn se llama cuando la persona termina de llenar el formulario y lo quiere enviar 
-  console.log('Datos del formulario:', formData.value);
-};
+const enviarFormulario = async () => {
+  console.log('Datos del formulario:', customerData.value);
+
+  const salesData = {
+    customer:{
+      ...customerData.value,
+    },
+    products: cart.value.map(item => ({
+      id: item.id,
+      image: item.image,
+      code: item.code,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      stock: item.stock,
+      quantity: item.quantity
+    })),
+    payment:{
+      ...paymentData.value,
+    }
+  }
+
+ 
+
+  };
+  
 
 </script>

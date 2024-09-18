@@ -2,10 +2,10 @@
   <div class="container mx-auto px-4 py-8">
     <div v-if="loading">Cargando productos...</div>
     <div v-else-if="error">Error: {{ error }}</div>
-    <div v-else-if="products.length === 0">No se encontraron productos.</div>
+    <div v-else-if="filteredProducts.length === 0">No se encontraron productos.</div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div
-        v-for="product in products"
+        v-for="product in filteredProducts"
         :key="product.id"
         class="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
       >
@@ -21,7 +21,7 @@
           <h3 class="font-bold text-lg mb-2 text-gray-800 truncate">{{ product.description }}</h3>
           <p class="text-sm text-gray-600 mb-2">Código: {{ product.code }}</p>
           <div class="flex justify-between items-center mb-4">
-            <span class="text-xl font-bold text-blue-600">${{ formatPrice(product.price) }}</span>
+            <span class="text-xl font-bold text-blue-600">{{ formatPrice(product.price) }}</span>
             <span :class="['px-2 py-1 rounded-full text-xs font-bold', getStockClass(product.stock)]">
               {{ getStockLabel(product.stock) }}
             </span>
@@ -46,19 +46,27 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, onMounted, watch, computed } from 'vue';
 import type IProduct from '@/modules/interfaces/IProducts';
 import { useCartStore } from '@/modules/stores/CartStores';
-import { onMounted, ref } from 'vue';
 
-const baseUrl = import.meta.env.VITE_BASE_URL;
+const props = defineProps<{
+  searchQuery: string;
+  selectedCategory: string;
+}>();
+
+const emit = defineEmits(['updateCategories']);
+
 const cartStore = useCartStore();
 const products = ref<IProduct[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 
+const baseUrl = import.meta.env.VITE_BASE_URL;
+
 const formatPrice = (price: any): string => {
   const numPrice = Number(price);
-  return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
+  return isNaN(numPrice) ? 'N/A' : `$${numPrice.toFixed(2)}`;
 };
 
 const getStockClass = (stock: any): string => {
@@ -97,6 +105,7 @@ const fetchProducts = async (): Promise<void> => {
     if (Array.isArray(data)) {
       products.value = data;
       console.log('Productos procesados:', products.value);
+      updateCategories();
     } else {
       throw new Error('Los datos recibidos no son un array');
     }
@@ -108,14 +117,38 @@ const fetchProducts = async (): Promise<void> => {
   }
 };
 
-onMounted(() => {
-  console.log('Componente montado, iniciando fetchProducts');
-  fetchProducts();
-});
-
 const addToCart = (product: IProduct) => {
   if (isInStock(product.stock)) {
     cartStore.addToCart(product);
   }
 };
+
+const filteredProducts = computed(() => {
+  return products.value.filter(product => {
+    const matchesSearch = props.searchQuery 
+      ? product.description.toLowerCase().includes(props.searchQuery.toLowerCase()) ||
+        product.code.toLowerCase().includes(props.searchQuery.toLowerCase())
+      : true;
+    
+    const matchesCategory = props.selectedCategory
+      ? product.category === props.selectedCategory
+      : true;
+
+    return matchesSearch && matchesCategory;
+  });
+});
+
+const updateCategories = () => {
+  const uniqueCategories = [...new Set(products.value.map(product => product.category))];
+  emit('updateCategories', uniqueCategories);
+};
+
+onMounted(() => {
+  console.log('Componente CardProducts montado, iniciando fetchProducts');
+  fetchProducts();
+});
+
+watch([() => props.searchQuery, () => props.selectedCategory], () => {
+  console.log('Búsqueda o categoría actualizada:', props.searchQuery, props.selectedCategory);
+});
 </script>
