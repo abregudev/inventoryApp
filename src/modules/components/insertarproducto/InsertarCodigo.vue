@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white p-8 border rounded-lg shadow-md max-w-2xl mx-auto mt-8">
+  <div class="bg-white p-8 max-w-2xl mx-auto mt-8">
     <h1 class="text-3xl font-bold mb-6 text-center">Gestión de Inventario</h1>
     
     <!-- Indicador de fases -->
@@ -114,7 +114,7 @@ const producto = ref({
   stock: 0,
   price: 0,
   code: '',
-  image: null as File | null
+  image: '' as string | null
 })
 const nuevoStock = ref(0)
 const imagePreview = ref('')
@@ -178,10 +178,13 @@ const handleImageUpload = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
-    producto.value.image = file
     const reader = new FileReader()
     reader.onload = e => {
-      imagePreview.value = e.target?.result as string
+      const result = e.target?.result
+      if (typeof result === 'string') {
+        imagePreview.value = result
+        producto.value.image = result // Guardamos la imagen como base64 string
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -193,15 +196,10 @@ const submitProduct = async () => {
     return
   }
 
-  const formData = new FormData()
-  Object.entries(producto.value).forEach(([key, value]) => {
-    if (key === 'image' && value instanceof File) {
-      formData.append('image', value)
-    } else if (value !== null && value !== undefined) {
-      formData.append(key, value.toString())
-    }
-  })
-  formData.append('nuevoStock', nuevoStock.value.toString())
+  const productData = {
+    ...producto.value,
+    nuevoStock: nuevoStock.value
+  }
 
   const url = isEditMode.value
     ? `${baseUrl}/products/update-product/${producto.value.code}/`
@@ -212,7 +210,10 @@ const submitProduct = async () => {
   try {
     const response = await fetch(url, {
       method: method,
-      body: formData
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData)
     })
     if (!response.ok) {
       throw new Error('Error en la solicitud')
