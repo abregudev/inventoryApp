@@ -102,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref} from 'vue'
+import { ref } from 'vue'
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -146,22 +146,28 @@ const searchProduct = async () => {
       isEditMode.value = true
     } else {
       // Producto no encontrado, preparar para crear uno nuevo
-      producto.value = {
-        category: '',
-        description: '',
-        stock: 0,
-        price: 0,
-        code: '',
-        image: null
-      }
-      imagePreview.value = ''
-      isEditMode.value = false
+      prepareNewProduct()
     }
     currentPhase.value = 2
   } catch (error) {
     console.error('Error:', error)
-    alert('Ocurrió un error al buscar el producto. Por favor, intente de nuevo.')
+    // Si hay un error en la búsqueda, preparamos para crear un nuevo producto
+    prepareNewProduct()
   }
+}
+
+const prepareNewProduct = () => {
+  producto.value = {
+    category: '',
+    description: '',
+    stock: 0,
+    price: 0,
+    code: searchCode.value,
+    image: null
+  }
+  imagePreview.value = ''
+  isEditMode.value = false
+  currentPhase.value = 2
 }
 
 const triggerFileInput = () => {
@@ -182,12 +188,17 @@ const handleImageUpload = (event: Event) => {
 }
 
 const submitProduct = async () => {
+  if (!producto.value.code) {
+    alert('Por favor, ingrese un código de producto.')
+    return
+  }
+
   const formData = new FormData()
-  Object.keys(producto.value).forEach(key => {
-    if (key === 'image' && producto.value.image instanceof File) {
-      formData.append('image', producto.value.image)
-    } else {
-      formData.append(key, producto.value[key].toString())
+  Object.entries(producto.value).forEach(([key, value]) => {
+    if (key === 'image' && value instanceof File) {
+      formData.append('image', value)
+    } else if (value !== null && value !== undefined) {
+      formData.append(key, value.toString())
     }
   })
   formData.append('nuevoStock', nuevoStock.value.toString())
