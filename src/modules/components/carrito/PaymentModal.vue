@@ -155,9 +155,9 @@ const enviarFormulario = async () => {
   }
 
   console.log(salesData)
-  
+
   try{
-    fetch(`${baseUrl}/products/add-product/`,{
+    fetch(`${baseUrl}/sales/add-sales/`,{
       method: 'POST',
       headers:{
         'Content-Type': 'application/json'

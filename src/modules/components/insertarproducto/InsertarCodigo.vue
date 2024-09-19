@@ -199,6 +199,8 @@ const submitProduct = async () => {
     ...producto.value, //HAce una copia de producto se usa .value para traer sus valores
     stock: isEditMode.value ? producto.value.stock + Number(nuevoStock.value) : Number(nuevoStock.value) //suma el stock actual al stock nuevo
   }
+  console.log("*******************************")
+  console.log(productData)
   //esta constante contendra la direcciòn a la que se enviarà la solicitud
   const url = isEditMode.value //Este es un valor boolean q indica si el formulario esta en modo de ediciòn 
     ? `${baseUrl}/products/update-product/${producto.value.code}/` //Si isEditMode.value es true, se construye la URL para actualizar un producto existente, utilizando el código del producto para identificarlo.

@@ -165,7 +165,7 @@ const listSales = async() =>{
     salesData.value = data
 
     console.log("*************************")
-    console.log(salesData.value[1].sale_products)
+    console.log(salesData.value)
     console.log("*************************")
 
   }catch(error){
