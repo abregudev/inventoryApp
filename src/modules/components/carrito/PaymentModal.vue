@@ -82,16 +82,13 @@
         <div class="mt-6 flex justify-end space-x-3">
           <button
             type="button"
-            
-            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
-          >
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
             Cancelar
           </button>
           <button
             type="submit"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-          >
-          Enviar
+            class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+            Enviar
           </button>
         </div>
       </form>
@@ -112,7 +109,7 @@ cartStore.loadCartFromLocalStorage();
 // Usa storeToRefs para obtener una referencia reactiva al carrito
 const { cart } = storeToRefs(cartStore);
 
-const props = defineProps<{
+const props = defineProps<{ //este codigo dice voy a recibir una propiedad llamda isOPen, las props son como mensajes o datos que un componente puede recibir desde su papà
   isOpen: boolean;
 }>();
 
@@ -128,7 +125,7 @@ const paymentData = ref({
   comprobante: null as File | null,
 })
 
-const handleFileUpload = (event: Event) => {
+const handleFileUpload = (event: Event) => { //Esta funciòn es para manejar cuando alguien sube el archivo como una foto o un pdf, toma el archivo y lo guarda en nuetra cajita fromData
   const target = event.target as HTMLInputElement;
   if (target.files) {
     paymentData.value.comprobante = target.files[0];
