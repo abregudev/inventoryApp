@@ -4,7 +4,15 @@
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center"
   >
     <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800">Datos de Venta</h2>
+      <!-- Añadimos un encabezado con botón de cierre -->
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Datos de Venta</h2>
+        <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
 
       <form @submit.prevent="enviarFormulario">
         <div class="space-y-4">
@@ -53,7 +61,8 @@
 
           <div>
             <label for="metodoPago" class="block text-sm font-medium text-gray-700"
-              >Método de Pago</label>
+              >Método de Pago</label
+            >
             <select
               id="metodoPago"
               v-model="paymentData.metodoPago"
@@ -82,6 +91,7 @@
         <div class="mt-6 flex justify-end space-x-3">
           <button
             type="button"
+            @click="closeModal"
             class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
             Cancelar
           </button>
@@ -109,9 +119,12 @@ cartStore.loadCartFromLocalStorage();
 // Usa storeToRefs para obtener una referencia reactiva al carrito
 const { cart } = storeToRefs(cartStore);
 
-const props = defineProps<{ //este codigo dice voy a recibir una propiedad llamda isOPen, las props son como mensajes o datos que un componente puede recibir desde su papà
+const props = defineProps<{
   isOpen: boolean;
 }>();
+
+// Definimos los eventos que este componente puede emitir
+const emit = defineEmits(['close', 'submit']);
 
 const customerData = ref({
   fullname: '',
@@ -125,11 +138,16 @@ const paymentData = ref({
   comprobante: null as File | null,
 })
 
-const handleFileUpload = (event: Event) => { //Esta funciòn es para manejar cuando alguien sube el archivo como una foto o un pdf, toma el archivo y lo guarda en nuetra cajita fromData
+const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
     paymentData.value.comprobante = target.files[0];
   }
+};
+
+// Nueva función para cerrar el modal
+const closeModal = () => {
+  emit('close');
 };
 
 const enviarFormulario = async () => {
@@ -157,31 +175,30 @@ const enviarFormulario = async () => {
   console.log(salesData)
 
   try{
-    fetch(`${baseUrl}/sales/add-sales/`,{
+    const response = await fetch(`${baseUrl}/sales/add-sales/`,{
       method: 'POST',
       headers:{
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(salesData)
-      
-    })
-    .then(response =>{
-      if (!response.ok) {
-        throw new Error('Error en la solicitud');
-      }
-      console.log(response)
-    })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error en la solicitud');
+    }
+    console.log(response)
+    
+    // Emitir evento de envío exitoso
+    emit('submit');
+    
+    // Cerrar el modal
+    closeModal();
+    
+    // Limpiar el carrito
+    cartStore.clearCart();
     
   }catch(error){
     console.error('Hubo un error:', error);
   }
-
-
-
-
-
-
- 
-
-  };
+};
 </script>

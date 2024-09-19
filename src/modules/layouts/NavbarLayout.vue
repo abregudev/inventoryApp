@@ -19,6 +19,7 @@
           <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/inventario">Productos</RouterLink>
           <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/nuevoproducto">Agregar</RouterLink>
           <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/ventas">Ventas</RouterLink>
+          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/customers">Clientes</RouterLink>
         </nav>
 
         <!-- Search and Cart (Desktop) -->
@@ -76,6 +77,7 @@
         <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/inventario">Productos</RouterLink>
         <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/nuevoproducto">Agregar</RouterLink>
         <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/ventas">Ventas</RouterLink>
+        <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/customers">Clientes</RouterLink>
       </div>
       <div class="pt-4 pb-3 border-t border-gray-200">
         <div class="px-4 flex items-center space-x-4">

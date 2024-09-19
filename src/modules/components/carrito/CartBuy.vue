@@ -27,7 +27,7 @@
             -
           </button>
           
-          <span class="bg-gray-100 px-4 py-1">{{ quantities[index] }}</span>
+          <span class="bg-gray-100 px-4 py-1">{{ item.quantity }}</span>
 
           <button
             @click="increaseQuantity(index)"
@@ -97,48 +97,28 @@ import PaymentModal from './PaymentModal.vue'; // Asegúrate de que la ruta sea 
 
 //cartStore: Creas una instancia del store del carrito, lo que te permite interactuar con los datos del carrito.
 const cartStore = useCartStore();
-//cartItems: Almacenas el carrito de compras (cartStore.cart) en una variable para poder acceder y modificar los productos.
-const cartItems = ref(cartStore.cart);
-//quantities: Es una variable reactiva que almacena la cantidad de cada producto en el carrito.
-// Variable reactiva para almacenar la cantidad de cada producto
+//cartItems: Ahora es una propiedad computada que obtiene los datos directamente del store
+const cartItems = computed(() => cartStore.cart);
 
-// const quantities = ref<number[]>(cartItems.map((item) => item.quantity));
-// Computed para obtener las cantidades
-const quantities = computed(() => cartItems.value.map(item => item.quantity));
-
-
-// Función para actualizar el carrito local desde el store
-const updateCart = () => {
-  cartItems.value = [...cartStore.cart];
-};
-
-
-//increaseQuantity: Aumenta la cantidad del producto en la posición index dentro del array quantities
-// Aumenta la cantidad del producto
+// Función para aumentar la cantidad de un producto
 const increaseQuantity = (index: number) => {
   if (index >= 0 && index < cartItems.value.length) {
     const product = cartItems.value[index];
     cartStore.addToCart(product);
-    updateCart();
   }
 };
 
-//decreaseQuantity: Reduce la cantidad del producto en la posición index,
+// Función para disminuir la cantidad de un producto
 const decreaseQuantity = (index: number) => {
   if (index >= 0 && index < cartItems.value.length) {
     const product = cartItems.value[index];
     if (product.quantity > 1) {
-      quantities.value[index] -= 1;
       cartStore.decreaseQuantity(product)
     }
-    updateCart();
   }
 };
 
-
 //subtotal: Calcula el total del carrito antes de impuestos.
-//Usa reduce para sumar el precio de cada producto multiplicado por la cantidad asociada en quantities.
-// Es una propiedad computada, lo que significa que se recalcula automáticamente cuando cambian las cantidades o los productos.
 const subtotal = computed(() => {
   return cartItems.value.reduce((acc, item) => acc + item.price * item.quantity, 0);
 });
@@ -147,18 +127,18 @@ const subtotal = computed(() => {
 const tax = computed(() => subtotal.value * 0.18);
 //total: Suma el subtotal y los impuestos para obtener el total final a pagar
 const total = computed(() => subtotal.value + tax.value);
-//removeItem: Elimina un producto del carrito (array cartItems) usando splice, que quita el producto en la posición index.
+
+//removeItem: Elimina un producto del carrito usando el store
 const removeItem = (index: number) => {
   if (index >= 0 && index < cartItems.value.length) {
     const product = cartItems.value[index];
     cartStore.clearItemCart(product.id);
-    updateCart();
   }
 };
 
 // Lógica para el modal de pago
 //isPaymentModalOpen: Una variable reactiva que controla si el modal de pago está abierto o cerrado.
-const isPaymentModalOpen = ref(false); // Inicia como false, lo que indica que el modal está cerrado.
+const isPaymentModalOpen = ref(false);
 //openPaymentModal: Cambia isPaymentModalOpen a true, lo que abre el modal de pago.
 const openPaymentModal = () => {
   isPaymentModalOpen.value = true;
@@ -168,15 +148,14 @@ const closePaymentModal = () => {
   isPaymentModalOpen.value = false;
 };
 //handlePaymentSubmit: Esta función maneja los datos del pago (que se reciben como paymentData).
-const handlePaymentSubmit = (paymentData: any) => {
+const handlePaymentSubmit = () => {
   // Aquí puedes manejar los datos del pago
-  console.log('Datos de pago recibidos:', paymentData);
+  console.log('Pago procesado con éxito');
   // Implementa la lógica para procesar el pago
   // Por ejemplo, puedes enviar los datos a tu backend
   // y luego limpiar el carrito si el pago es exitoso
-  //Aquí podrías implementar la lógica para procesar el pago,
-  //como enviar la información al backend y limpiar el carrito si el pago es exitoso.
   closePaymentModal();
+  cartStore.clearCart();
 };
 
 //GUARDAR CARRITO EN LOCALSTORAGE
@@ -192,11 +171,6 @@ watch(
 //RECUPERAR CARRITO DE LOCALSTORAGE recupera el carrito y las cantidades cuando la pagina se carga o recarga
 //esta funcion se ejecuta cuando el componente termina de cargarse es decir cuando esta lista
 onMounted(() => {
-  const savedCart = localStorage.getItem('cart');
-  if (savedCart) {
-    const parsedCart = JSON.parse(savedCart);
-    cartStore.$patch({ cart: parsedCart });
-    updateCart();
-  }
+  cartStore.loadCartFromLocalStorage();
 });
 </script>

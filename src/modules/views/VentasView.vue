@@ -32,15 +32,15 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="venta in ventas" :key="venta.id" class="hover:bg-gray-50">
-            <td class="border-b border-gray-200 px-6 py-4">{{ venta.fecha }}</td>
-            <td class="border-b border-gray-200 px-6 py-4">{{ venta.cliente }}</td>
-            <td class="border-b border-gray-200 px-6 py-4">{{ venta.dni }}</td>
-            <td class="border-b border-gray-200 px-6 py-4">{{ venta.ruc }}</td>
+          <tr v-for="venta in filteredSales" :key="venta.id" class="hover:bg-gray-50">
+            <td class="border-b border-gray-200 px-6 py-4">{{ formatDate(venta.date) }}</td>
+            <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.fullname }}</td>
+            <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.dni }}</td>
+            <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.ruc }}</td>
             <td class="border-b border-gray-200 px-6 py-4 font-semibold">{{ venta.total }}</td>
             <td class="border-b border-gray-200 px-6 py-4">
-              <span :class="metodoPagoClase(venta.metodoPago)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                {{ venta.metodoPago }}
+              <span :class="metodoPagoClase(venta.payment_method)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                {{ venta.payment_method || 'No especificado' }}
               </span>
             </td>
             <td class="border-b border-gray-200 px-6 py-4">
@@ -53,14 +53,14 @@
 
     <!-- Vista móvil -->
     <div class="md:hidden space-y-4">
-      <div v-for="venta in ventas" :key="venta.id" class="bg-white shadow rounded-lg p-4">
+      <div v-for="venta in filteredSales" :key="venta.id" class="bg-white shadow rounded-lg p-4">
         <div class="flex justify-between items-center mb-2">
-          <span class="font-semibold">{{ venta.cliente }}</span>
-          <span :class="metodoPagoClase(venta.metodoPago)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-            {{ venta.metodoPago }}
+          <span class="font-semibold">{{ venta.customer.fullname }}</span>
+          <span :class="metodoPagoClase(venta.payment_method)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+            {{ venta.payment_method || 'No especificado' }}
           </span>
         </div>
-        <div class="text-sm text-gray-600 mb-2">{{ venta.fecha }}</div>
+        <div class="text-sm text-gray-600 mb-2">{{ formatDate(venta.date) }}</div>
         <div class="flex justify-between items-center">
           <span class="font-bold">{{ venta.total }}</span>
           <button @click="verDetalles(venta)" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">Ver Detalles</button>
@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <!-- Modal de Detalles de Venta Actualizado -->
+    <!-- Modal de Detalles de Venta -->
     <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center p-4">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div class="p-6">
@@ -82,11 +82,11 @@
           </div>
 
           <div v-if="selectedVenta" class="space-y-4">
-            <p><span class="font-bold">Cliente:</span> {{ selectedVenta.cliente }}</p>
-            <p><span class="font-bold">DNI:</span> {{ selectedVenta.dni }}</p>
-            <p><span class="font-bold">RUC:</span> {{ selectedVenta.ruc }}</p>
-            <p><span class="font-bold">Fecha:</span> {{ selectedVenta.fecha }}</p>
-            <p><span class="font-bold">Método de Pago:</span> {{ selectedVenta.metodoPago }}</p>
+            <p><span class="font-bold">Cliente:</span> {{ selectedVenta.customer.fullname }}</p>
+            <p><span class="font-bold">DNI:</span> {{ selectedVenta.customer.dni }}</p>
+            <p><span class="font-bold">RUC:</span> {{ selectedVenta.customer.ruc }}</p>
+            <p><span class="font-bold">Fecha:</span> {{ formatDate(selectedVenta.date) }}</p>
+            <p><span class="font-bold">Método de Pago:</span> {{ selectedVenta.payment_method || 'No especificado' }}</p>
             <p><span class="font-bold">Total:</span> {{ selectedVenta.total }}</p>
           </div>
 
@@ -99,25 +99,29 @@
                     <th class="px-4 py-2 text-left">Código</th>
                     <th class="px-4 py-2 text-left">Descripción</th>
                     <th class="px-4 py-2 text-right">Cantidad</th>
+                    <th class="px-4 py-2 text-right">Precio</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <!-- Aquí deberías iterar sobre los productos de la venta seleccionada -->
-                  <tr class="border-b border-gray-200">
-                    <td class="px-4 py-2">PROD001</td>
-                    <td class="px-4 py-2">Producto de ejemplo</td>
-                    <td class="px-4 py-2 text-right">1</td>
+                  <tr v-for="item in selectedVenta?.sale_products" :key="item.id" class="border-b border-gray-200">
+                    <td class="px-4 py-2">{{ item.product.code }}</td>
+                    <td class="px-4 py-2">{{ item.product.description }}</td>
+                    <td class="px-4 py-2 text-right">{{ item.quantity }}</td>
+                    <td class="px-4 py-2 text-right">{{ item.price }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div class="mt-6 space-y-4">
-            <button @click="verComprobante" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition duration-300">
+          <div class="mt-6 space-y-2">
+            <button v-if="selectedVenta && ['yape', 'transferencia'].includes(selectedVenta.payment_method || '')" 
+                    @click="verComprobante" 
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm transition duration-300">
               Ver Comprobante de Pago
             </button>
-            <button @click="descargarComprobante" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded transition duration-300">
+            <button @click="descargarComprobante" 
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-sm transition duration-300">
               Descargar Comprobante
             </button>
           </div>
@@ -128,58 +132,143 @@
 </template>
 
 <script lang="ts" setup>
+import { ref, onMounted, watch, computed } from 'vue'
 
-import { ref, onMounted } from 'vue'
-import type { ISalesData } from '../interfaces';
+interface Customer {
+  id: number;
+  fullname: string;
+  dni: string;
+  email: string | null;
+  phone: string;
+  ruc: string;
+  business_name: string | null;
+  address: string | null;
+}
+
+interface Product {
+  id: number;
+  image: string;
+  code: string;
+  description: string;
+  price: string;
+  category: string;
+  stock: number;
+}
+
+interface SaleProduct {
+  id: number;
+  product: Product;
+  quantity: number;
+  price: string;
+}
+
+interface Sale {
+  id: number;
+  customer: Customer;
+  date: string;
+  sale_products: SaleProduct[];
+  total: string;
+  payment_method?: string;
+}
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
-// Uso en un componente Vue
+const salesData = ref<Sale[]>([]);
+const selectedDate = ref('');
+const searchTerm = ref('');
+const isModalOpen = ref(false);
+const selectedVenta = ref<Sale | null>(null);
 
-const salesData = ref<ISalesData>([]);
-
-// interface Venta {
-//   id: number;
-//   fecha: string;
-//   cliente: string;
-//   dni: string;
-//   ruc: string;
-//   total: string;
-//   metodoPago: string;
-// }
-
-const listSales = async() =>{
-  try{
-
+const listSales = async () => {
+  console.log("Iniciando listSales");
+  try {
+    console.log("URL de la API:", `${baseUrl}/sales/list-sales/`);
     const response = await fetch(`${baseUrl}/sales/list-sales/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       },
-
     });
       
     if (!response.ok) {
-      throw new Error('Error en la solicitud');
+      throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
     }
     const data = await response.json();
-    salesData.value = data
-
-    console.log("*************************")
-    console.log(salesData.value)
-    console.log("*************************")
-
-  }catch(error){
-    console.log(error)
+    console.log("Estructura de datos recibidos:", JSON.stringify(data[0], null, 2));
+    salesData.value = data;
+    console.log("salesData actualizado:", salesData.value);
+  } catch (error) {
+    console.error('Error al obtener las ventas:', error);
   }
 }
 
-onMounted(()=>{
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleString();
+}
+
+const verDetalles = (venta: Sale) => {
+  console.log("Detalles de la venta:", venta);
+  selectedVenta.value = venta;
+  isModalOpen.value = true;
+}
+
+const closeModal = () => {
+  isModalOpen.value = false;
+  selectedVenta.value = null;
+}
+
+const metodoPagoClase = (metodo: string | undefined): string => {
+  if (!metodo) return 'bg-gray-100 text-gray-800';
+  
+  switch (metodo.toLowerCase()) {
+    case 'yape':
+      return 'bg-purple-100 text-purple-800';
+    case 'efectivo':
+      return 'bg-green-100 text-green-800';
+    case 'transferencia':
+      return 'bg-blue-100 text-blue-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+}
+
+const verComprobante = () => {
+  console.log('Ver comprobante');
+  // Implementar lógica para ver el comprobante
+}
+
+const descargarComprobante = () => {
+  console.log('Descargar comprobante');
+  // Implementar lógica para descargar el comprobante
+}
+
+const filteredSales = computed(() => {
+  return salesData.value.filter(venta => {
+    const matchDate = selectedDate.value === '' || venta.date.includes(selectedDate.value);
+    const matchSearch = searchTerm.value === '' || 
+      venta.customer.fullname.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+      venta.customer.dni.includes(searchTerm.value) ||
+      venta.customer.ruc.includes(searchTerm.value);
+    return matchDate && matchSearch;
+  });
+});
+
+onMounted(() => {
+  console.log("Componente montado");
   listSales();
 })
 
+// Observadores para ver cuando cambian los filtros
+watch(selectedDate, () => {
+  console.log("Fecha seleccionada cambiada:", selectedDate.value);
+});
 
+watch(searchTerm, () => {
+  console.log("Término de búsqueda cambiado:", searchTerm.value);
+});
 
-
-
-
+// Log cada vez que salesData cambia
+watch(salesData, (newSalesData) => {
+  console.log("salesData actualizado:", newSalesData);
+});
 </script>
