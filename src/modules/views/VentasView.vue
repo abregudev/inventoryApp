@@ -129,38 +129,48 @@
 
 <script lang="ts" setup>
 
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import type { ISalesData } from '../interfaces';
+
 const baseUrl = import.meta.env.VITE_BASE_URL;
+// Uso en un componente Vue
 
+const salesData = ref<ISalesData>([]);
 
-interface Venta {
-  id: number;
-  fecha: string;
-  cliente: string;
-  dni: string;
-  ruc: string;
-  total: string;
-  metodoPago: string;
-}
+// interface Venta {
+//   id: number;
+//   fecha: string;
+//   cliente: string;
+//   dni: string;
+//   ruc: string;
+//   total: string;
+//   metodoPago: string;
+// }
 
+const listSales = async() =>{
+  try{
 
-const listSales =()=>{
-  fetch(`${baseUrl}/sales/list-sales/`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    const response = await fetch(`${baseUrl}/sales/list-sales/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
 
-  })
-  .then(response => {
+    });
+      
     if (!response.ok) {
       throw new Error('Error en la solicitud');
     }
+    const data = await response.json();
+    salesData.value = data
 
-    console.log("**************************")
-    console.log(response.json());
+    console.log("*************************")
+    console.log(salesData.value[1].sale_products)
+    console.log("*************************")
 
-  })
+  }catch(error){
+    console.log(error)
+  }
 }
 
 onMounted(()=>{
