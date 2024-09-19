@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
     <h1 class="text-4xl font-bold mb-8 text-gray-800">Gestión de Clientes</h1>
     
     <div class="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">

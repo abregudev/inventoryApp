@@ -3,8 +3,7 @@
     v-if="isOpen"
     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center"
   >
-    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-      <!-- Añadimos un encabezado con botón de cierre -->
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-2xl w-full">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Datos de Venta</h2>
         <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
@@ -60,9 +59,7 @@
           </div>
 
           <div>
-            <label for="metodoPago" class="block text-sm font-medium text-gray-700"
-              >Método de Pago</label
-            >
+            <label for="metodoPago" class="block text-sm font-medium text-gray-700">Método de Pago</label>
             <select
               id="metodoPago"
               v-model="paymentData.metodoPago"
@@ -76,17 +73,45 @@
           </div>
 
           <div v-if="paymentData.metodoPago !== 'efectivo'">
-            <label for="comprobante" class="block text-sm font-medium text-gray-700"
-              >Subir Comprobante</label
-            >
+            <label for="comprobante" class="block text-sm font-medium text-gray-700">Subir Comprobante</label>
             <input
               type="file"
               id="comprobante"
               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
               @change="handleFileUpload"
-              />
+            />
           </div>
         </div>
+
+         <!-- Resumen de la venta -->
+      <div class="mb-6 bg-gray-50 p-4 rounded-lg mt-7">
+        <h3 class="text-lg font-semibold mb-2">Resumen de la Venta</h3>
+        <div class="max-h-40 overflow-y-auto mb-4">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="p-2 text-left">Código</th>
+                <th class="p-2 text-left">Nombre</th>
+                <th class="p-2 text-right">Cantidad</th>
+                <th class="p-2 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in cart" :key="item.id" class="border-b">
+                <td class="p-2">{{ item.code }}</td>
+                <td class="p-2">{{ item.description }}</td>
+                <td class="p-2 text-right">{{ item.quantity }}</td>
+                <td class="p-2 text-right">S/ {{ (item.price * item.quantity).toFixed(2) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-right">
+          <p><span class="font-semibold">Subtotal:</span> S/ {{ subtotal.toFixed(2) }}</p>
+          <p><span class="font-semibold">IGV (18%):</span> S/ {{ igv.toFixed(2) }}</p>
+          <p class="text-lg font-bold"><span>Total:</span> S/ {{ total.toFixed(2) }}</p>
+        </div>
+      </div>
 
         <div class="mt-6 flex justify-end space-x-3">
           <button
@@ -102,13 +127,15 @@
           </button>
         </div>
       </form>
+      
+
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useCartStore } from '@/modules/stores/CartStores';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -137,6 +164,14 @@ const paymentData = ref({
   metodoPago: 'transferencia',
   comprobante: null as File | null,
 })
+
+// Cálculos para el resumen de la venta
+const subtotal = computed(() => {
+  return cart.value.reduce((total, item) => total + (item.price * item.quantity), 0);
+});
+
+const igv = computed(() => subtotal.value * 0.18);
+const total = computed(() => subtotal.value + igv.value);
 
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
