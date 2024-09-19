@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-100 p-8 h h-[92vh]">
+  <div class="p-8 h-[92vh]">
     <h1 class="text-3xl font-bold mb-8 text-gray-800">Dashboard ERP</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">

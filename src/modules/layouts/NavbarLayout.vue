@@ -1,124 +1,53 @@
 <template>
-  <header class="bg-white shadow-md">
-    <div class="container mx-auto px-4 py-2">
-      <div class="flex items-center justify-between">
-        <!-- Logo -->
-        <div class="flex-shrink-0">
-          <RouterLink to="/home">
-            <img
-              class="h-10 w-auto"
-              src="https://i.postimg.cc/ZKJnSw77/inventory-high-resolution-logo-black-transparent.png"
-              alt="Inventory"
-            />
-          </RouterLink>
-        </div>
-
-        <!-- Desktop Navigation -->
-        <nav class="hidden md:flex space-x-8">
-          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/home">Dashboard</RouterLink>
-          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/inventario">Productos</RouterLink>
-          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/nuevoproducto">Agregar</RouterLink>
-          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/ventas">Ventas</RouterLink>
-          <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/customers">Clientes</RouterLink>
-        </nav>
-
-        <!-- Search and Cart (Desktop) -->
-        <div class="hidden md:flex items-center space-x-4">
-          <div class="relative">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              class="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <div class="absolute left-3 top-2.5 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-              </svg>
-            </div>
-          </div>
-         
-        </div>
-
-        <!-- Mobile menu button -->
-        <div class="md:hidden">
-          <button
-            @click="toggleMenu"
-            class="text-gray-500 hover:text-gray-600 focus:outline-none focus:text-gray-600"
-          >
-            <svg
-              v-if="!isMenuOpen"
-              class="h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <svg
-              v-else
-              class="h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile Navigation -->
-    <div v-if="isMenuOpen" class="md:hidden">
-      <div class="px-2 pt-2 pb-3 space-y-1 flex justify-center items-center">
-        <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/home">Dashboard</RouterLink>
-        <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/inventario">Productos</RouterLink>
-        <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/nuevoproducto">Agregar</RouterLink>
-        <RouterLink class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50" to="/ventas">Ventas</RouterLink>
-        <RouterLink class="text-gray-700 hover:text-gray-900 font-medium" to="/customers">Clientes</RouterLink>
-      </div>
-      <div class="pt-4 pb-3 border-t border-gray-200">
-        <div class="px-4 flex items-center space-x-4">
-          <div class="relative flex-grow">
-            <input
-              type="text"
-              placeholder="Buscar productos..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <div class="absolute left-3 top-2.5 text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-              </svg>
-            </div>
-          </div>
-          
-        </div>
-      </div>
+  <header class="shadow-md fixed top-0 left-0 right-0 z-50">
+    <div class=" fixed left-4 top-1/2 transform -translate-y-1/2 z-50">
+      <nav :class="{'h-auto': isExpanded, 'h-16': !isExpanded}" class=" bg-transparent rounded-full shadow-lg py-4 px-2 flex flex-col items-center space-y-6 transition-all duration-300 overflow-hidden">
+      <button @click="toggleMenu" class=" text-blue-600 hover:text-blue-300">
+          <FontAwesomeIcon :icon="isExpanded ? 'chevron-up' : 'chevron-down'" />
+        </button>
+        <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/home">
+          <FontAwesomeIcon icon="tachometer-alt" />
+        </RouterLink>
+        <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/inventario">
+          <FontAwesomeIcon icon="box" />
+        </RouterLink>
+        <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/nuevoproducto">
+          <FontAwesomeIcon icon="plus-circle" />
+        </RouterLink>
+        <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/ventas">
+          <FontAwesomeIcon icon="shopping-cart" />
+        </RouterLink>
+        <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/customers">
+          <FontAwesomeIcon icon="users" />
+        </RouterLink>
+      </nav>
     </div>
   </header>
 
-  <main class="flex-1 flex-col">
+  <main class="flex-1 flex-col pt-10 ">
     <RouterView />
   </main>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { RouterLink, RouterView } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faTachometerAlt, faBox, faPlusCircle, faShoppingCart, faUsers, faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
-import { RouterLink, RouterView } from 'vue-router';//RouterView: Lugar donde se renderizarán los componentes asociados con la ruta actual.//RouterLink: Componente que se utiliza para crear enlaces de navegación entre diferentes rutas de la aplicación.
+// Agregar los iconos a la biblioteca
+library.add(faTachometerAlt, faBox, faPlusCircle, faShoppingCart, faUsers, faChevronUp, faChevronDown);
 
-import { useCartStore } from '@/modules/stores/CartStores';//Importa el store del carrito desde Pinia
-import { computed, ref } from 'vue';//Lo utilizamos para crear variables reactivas.
+const isExpanded = ref(false);
 
-const cartStore = useCartStore(); // Instancia el store del carrito
-const totalQuantity = computed(() => { // Computa la cantidad total de productos en el carrito
-  return cartStore.cart.reduce((sum, item) => sum + item.quantity, 0);
-});
-
-const isMenuOpen = ref(false);//isMenuOpen: Es una variable reactiva que indica si el menú está abierto o cerrado.
-const toggleMenu = () => {//toggleMenu: Es una función que cambia el estado del menú
-  //Esta línea invierte el valor actual, permitiendo abrir o cerrar el menú cada vez que se llama a la función.
-  isMenuOpen.value = !isMenuOpen.value;
+const toggleMenu = () => {
+  isExpanded.value = !isExpanded.value;
 };
 </script>
+
+<style scoped>
+nav {
+  transition: height 0.3s ease;
+}
+</style>
