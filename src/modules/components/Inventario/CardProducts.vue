@@ -48,7 +48,7 @@
 <script lang="ts" setup>
 
 import { ref, onMounted, watch, computed } from 'vue'; //ref crea variables reactivas, onMounted se ejecuta despues que el componente se monta, watch permite reaacionar a cambios reactivos y computed crea propiedades computadas
-import type IProduct from '@/modules/interfaces/IProducts'; //Importa un tipo llamado IProduct de una interfaz esto se utiliza para definir la estructura de un objeto
+import type IProduct from '@/modules/interfaces/IProduct'; //Importa un tipo llamado IProduct de una interfaz esto se utiliza para definir la estructura de un objeto
 import { useCartStore } from '@/modules/stores/CartStores'; //Importa una funciòn que es un store de Pinia utilizado para manejar el estado del carrrito 
 
 const props = defineProps<{ //Define las props del componente usando defineProps

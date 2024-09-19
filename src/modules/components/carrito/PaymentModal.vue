@@ -153,5 +153,35 @@ const enviarFormulario = async () => {
       ...paymentData.value,
     }
   }
+
+  console.log(salesData)
+  
+  try{
+    fetch(`${baseUrl}/products/add-product/`,{
+      method: 'POST',
+      headers:{
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(salesData)
+      
+    })
+    .then(response =>{
+      if (!response.ok) {
+        throw new Error('Error en la solicitud');
+      }
+      console.log(response)
+    })
+    
+  }catch(error){
+    console.error('Hubo un error:', error);
+  }
+
+
+
+
+
+
+ 
+
   };
 </script>
