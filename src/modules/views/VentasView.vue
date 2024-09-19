@@ -144,7 +144,7 @@ interface Venta {
 }
 
 
-const listSales = async()=>{
+const listSales =()=>{
   fetch(`${baseUrl}/sales/list-sales/`, {
     method: 'GET',
     headers: {
