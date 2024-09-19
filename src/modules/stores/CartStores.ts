@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 //Para crear variables reactivas 
 import { ref } from 'vue';
 //Es una interfaz que define como debe lucir un producto 
-import type IProduct from '../interfaces/IProducts';
+import type IProduct from '../interfaces/IProduct';
 
 //Ests interfaz exteinde la interfaz IProduct y añade la propiedad quantity, que es la cantidad en el carrito
 interface CartItem extends IProduct {

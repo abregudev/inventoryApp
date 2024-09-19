@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, computed } from 'vue';
-import type IProduct from '@/modules/interfaces/IProducts';
+import type IProduct from '@/modules/interfaces/IProduct';
 import { useCartStore } from '@/modules/stores/CartStores';
 
 const props = defineProps<{
