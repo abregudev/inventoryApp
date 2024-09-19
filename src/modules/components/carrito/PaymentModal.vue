@@ -184,6 +184,4 @@ const enviarFormulario = async () => {
  
 
   };
-  
-
 </script>

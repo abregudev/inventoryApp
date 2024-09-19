@@ -71,7 +71,6 @@
 import { defineProps, defineEmits, onMounted } from 'vue';
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
-
 const props = defineProps<{
   isOpen: boolean;
   sale: {
@@ -85,13 +84,11 @@ const props = defineProps<{
     productos: Array<{
       codigo: string;
       descripcion: string;
-      cantidad: number;
+      cantidad: number; 
       precio: number;
     }>;
   };
 }>();
-
-
 
 const emit = defineEmits(['close', 'verComprobante', 'descargarComprobante']);
 
@@ -106,6 +103,4 @@ const verComprobante = () => {
 const descargarComprobante = () => {
   emit('descargarComprobante');
 };
-
-
 </script>
