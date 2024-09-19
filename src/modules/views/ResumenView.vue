@@ -23,9 +23,9 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-      <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6 transition duration-300 ease-in-out hover:shadow-md">
+      <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6 transition duration-300 ease-in-out hover:shadow-md" style="height: 300px;"> <!-- Altura fija -->
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Tendencia de ventas</h2>
-        <Bar :data="chartData" :options="chartOptions" class="h-64" />
+        <Bar :data="chartData" :options="chartOptions" class="h-full" /> <!-- Clase h-full para que ocupe toda la altura -->
       </div>
       <div class="bg-white rounded-lg shadow-sm p-6 transition duration-300 ease-in-out hover:shadow-md">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Productos más vendidos</h2>
@@ -50,11 +50,22 @@
       </div>
       <div class="bg-white rounded-lg shadow-sm p-6 transition duration-300 ease-in-out hover:shadow-md">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Clientes frecuentes</h2>
-        <div class="grid grid-cols-5 gap-4">
-          <div v-for="i in 5" :key="i" class="h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-md flex items-center justify-center text-white font-semibold">
-            Cliente {{ i }}
-          </div>
-        </div>
+        <table class="min-w-full table-auto">
+          <thead>
+            <tr class="bg-gray-100 text-gray-600 text-sm leading-normal">
+              <th class="py-3 px-6 text-left">Nombre Completo</th>
+              <th class="py-3 px-6 text-left">DNI</th>
+              <th class="py-3 px-6 text-left">Celular</th>
+            </tr>
+          </thead>
+          <tbody class="text-gray-600 text-sm">
+            <tr v-for="(client, index) in frequentClients" :key="index" class="border-b border-gray-200 hover:bg-gray-100">
+              <td class="py-3 px-6 text-left">{{ client.name }}</td>
+              <td class="py-3 px-6 text-left">{{ client.dni }}</td>
+              <td class="py-3 px-6 text-left">{{ client.phone }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -86,7 +97,7 @@ export default defineComponent({
       datasets: [
         {
           label: 'Ventas diarias',
-          data: [1000, 2500, 4200, 3500, 6000, 7200],
+          data: [1500, 2500, 3500, 4500, 5500, 6500],
           backgroundColor: 'rgba(59, 130, 246, 0.8)',
           borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 1,
@@ -124,7 +135,11 @@ export default defineComponent({
     const lowStockProducts = ref([
       { name: 'Producto A', stock: 10 },
       { name: 'Producto B', stock: 5 },
-      { name: 'Producto C', stock: 2 },
+    ]);
+
+    const frequentClients = ref([
+      { name: 'Juan Pérez', dni: '12345678', phone: '987654321' },
+      { name: 'María López', dni: '87654321', phone: '912345678' },
     ]);
 
     return {
@@ -135,6 +150,7 @@ export default defineComponent({
       chartOptions,
       topProducts,
       lowStockProducts,
+      frequentClients,
     };
   },
 });
