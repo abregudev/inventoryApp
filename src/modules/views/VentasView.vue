@@ -133,55 +133,19 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch, computed } from 'vue'
-
-interface Customer {
-  id: number;
-  fullname: string;
-  dni: string;
-  email: string | null;
-  phone: string;
-  ruc: string;
-  business_name: string | null;
-  address: string | null;
-}
-
-interface Product {
-  id: number;
-  image: string;
-  code: string;
-  description: string;
-  price: string;
-  category: string;
-  stock: number;
-}
-
-interface SaleProduct {
-  id: number;
-  product: Product;
-  quantity: number;
-  price: string;
-}
-
-interface Sale {
-  id: number;
-  customer: Customer;
-  date: string;
-  sale_products: SaleProduct[];
-  total: string;
-  payment_method?: string;
-}
+import type { ISale } from '../interfaces';
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
-const salesData = ref<Sale[]>([]);
+
+const salesData = ref<ISale[]>([]);
+
 const selectedDate = ref('');
 const searchTerm = ref('');
 const isModalOpen = ref(false);
-const selectedVenta = ref<Sale | null>(null);
+const selectedVenta = ref<ISale | null>(null);
 
 const listSales = async () => {
-  console.log("Iniciando listSales");
   try {
-    console.log("URL de la API:", `${baseUrl}/sales/list-sales/`);
     const response = await fetch(`${baseUrl}/sales/list-sales/`, {
       method: 'GET',
       headers: {
@@ -193,9 +157,7 @@ const listSales = async () => {
       throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
     }
     const data = await response.json();
-    console.log("Estructura de datos recibidos:", JSON.stringify(data[0], null, 2));
     salesData.value = data;
-    console.log("salesData actualizado:", salesData.value);
   } catch (error) {
     console.error('Error al obtener las ventas:', error);
   }
@@ -206,7 +168,7 @@ const formatDate = (dateString: string) => {
   return date.toLocaleString();
 }
 
-const verDetalles = (venta: Sale) => {
+const verDetalles = (venta: ISale) => {
   console.log("Detalles de la venta:", venta);
   selectedVenta.value = venta;
   isModalOpen.value = true;
@@ -254,7 +216,6 @@ const filteredSales = computed(() => {
 });
 
 onMounted(() => {
-  console.log("Componente montado");
   listSales();
 })
 

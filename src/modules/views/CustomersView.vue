@@ -132,37 +132,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-
-interface Customer {
-  id: number;
-  fullname: string;
-  dni: string;
-  email: string;
-  phone: string;
-  ruc: string;
-  business_name: string;
-  address: string;
-}
+import { ref, computed, onMounted } from 'vue'
+import type { ICustomer } from '../interfaces';
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 // Datos ficticios
-const customersData = ref<Customer[]>([
-  {
-    id: 1,
-    fullname: "Juan Pérez",
-    dni: "12345678",
-    email: "juan.perez@email.com",
-    phone: "987654321",
-    ruc: "10123456789",
-    business_name: "Tienda Juan",
-    address: "Av. Principal 123"
-  }
-
-]);
-
+const customersData = ref<ICustomer[]>([]);
+  
+  // {
+  //   id: 1,
+  //   fullname: "Juan Pérez",
+  //   dni: "12345678",
+  //   email: "juan.perez@email.com",
+  //   phone: "987654321",
+  //   ruc: "10123456789",
+  //   business_name: "Tienda Juan",
+  //   address: "Av. Principal 123"
+  // }
 const searchTerm = ref('');
 const isModalOpen = ref(false);
-const selectedCustomer = ref<Customer | null>(null);
+const selectedCustomer = ref<ICustomer | null>(null);
 
 const filteredCustomers = computed(() => {
   return customersData.value.filter(customer => 
@@ -172,7 +161,32 @@ const filteredCustomers = computed(() => {
   );
 });
 
-const viewCustomerDetails = (customer: Customer) => {
+
+const listCustomers = async()=>{
+
+  try{
+    const response = await fetch(`${baseUrl}/customers/list-customers/`,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+    });
+    if (!response.ok){
+      throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    customersData.value = data;
+    console.log("CUSTOMERS", customersData.value)
+
+  }catch(error){
+    console.error('Error al obtener las ventas:', error);
+  }
+}
+
+
+const viewCustomerDetails = (customer: ICustomer) => {
   selectedCustomer.value = customer;
   isModalOpen.value = true;
 }
@@ -182,7 +196,7 @@ const closeModal = () => {
   selectedCustomer.value = null;
 }
 
-const editCustomer = (customer: Customer) => {
+const editCustomer = (customer: ICustomer) => {
   console.log('Editar cliente:', customer);
   // Implementar lógica para editar cliente
 }
@@ -191,4 +205,9 @@ const openAddCustomerModal = () => {
   console.log('Abrir modal para agregar cliente');
   // Implementar lógica para abrir modal de agregar cliente
 }
+
+onMounted(()=>{
+  listCustomers()
+})
+
 </script>
