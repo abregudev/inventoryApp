@@ -156,27 +156,8 @@ const customersData = ref<Customer[]>([
     ruc: "10123456789",
     business_name: "Tienda Juan",
     address: "Av. Principal 123"
-  },
-  {
-    id: 2,
-    fullname: "María García",
-    dni: "87654321",
-    email: "maria.garcia@email.com",
-    phone: "912345678",
-    ruc: "20987654321",
-    business_name: "Distribuidora María",
-    address: "Jr. Secundario 456"
-  },
-  {
-    id: 3,
-    fullname: "Carlos López",
-    dni: "45678912",
-    email: "carlos.lopez@email.com",
-    phone: "945678123",
-    ruc: "15678912345",
-    business_name: "Servicios Carlos",
-    address: "Calle Nueva 789"
   }
+
 ]);
 
 const searchTerm = ref('');
