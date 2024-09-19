@@ -32,6 +32,7 @@
               type="text"
               id="dni"
               v-model="customerData.dni"
+              @blur="searchCustomerDni"
               required
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             />
@@ -135,7 +136,7 @@
 
 <script setup lang="ts">
 import { useCartStore } from '@/modules/stores/CartStores';
-import { ref, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
@@ -184,6 +185,28 @@ const handleFileUpload = (event: Event) => {
 const closeModal = () => {
   emit('close');
 };
+
+const searchCustomerDni = async () => {
+  try{
+    if (customerData.value.dni.length > 0){
+      const response = await fetch(`${baseUrl}/customers/search-customer-dni/${customerData.value.dni}/`)
+      if(response.ok){
+        const data = await response.json();
+        if (data){
+          customerData.value = {
+            ...customerData.value,
+            fullname: data.fullname,
+            phone: data.phone,
+            ruc: data.ruc
+          }
+        }
+      }
+
+    }
+  }catch(error){
+    console.error('Hubo un error:', error);
+  }
+}
 
 const enviarFormulario = async () => {
   console.log('Datos del formulario:', customerData.value);
@@ -236,4 +259,12 @@ const enviarFormulario = async () => {
     console.error('Hubo un error:', error);
   }
 };
+
+// Observar cambios en el DNI para activar la búsqueda automática
+watch(() => customerData.value.dni, (newDNI) => {
+  if (newDNI.length >= 8) {  // Asumiendo que un DNI válido tiene 8 dígitos
+    searchCustomerDni();
+  }
+});
+
 </script>
