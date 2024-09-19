@@ -153,10 +153,5 @@ const enviarFormulario = async () => {
       ...paymentData.value,
     }
   }
-
- 
-
   };
-  
-
 </script>
