@@ -40,7 +40,7 @@
     </div>
     <!-- Fase 2: Formulario de Producto (Editar existente o Crear nuevo) -->
     <div v-if="currentPhase === 2">
-      <h2 class="text-2xl font-semibold mb-4">{{ isEditMode ? 'Editar Producto Existente' : 'Agregar Nuevo Producto' }}</h2>
+      <h2 class="text-2xl font-semibold mb-4">{{ isEditMode ? 'Agregar Producto Existente' : 'Agregar Nuevo Producto' }}</h2>
       <div class="grid grid-cols-2 gap-6">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
@@ -190,41 +190,54 @@ const handleImageUpload = (event: Event) => { //este evento se dispara cuando el
 }
 //Funciòn asincrona que se llama cuando el usuario decide añadir o actualizar un producto
 const submitProduct = async () => {
-  if (!producto.value.code) { //Verifica si hay un codigo ingresado sino hay muestra un alerta y define la funciòn 
+  if (!producto.value.code) {
     alert('Por favor, ingrese un código de producto.')
     return
   }
-  //Prepara los datos del producto que vamos a enviar 
-  const productData = {
-    ...producto.value, //HAce una copia de producto se usa .value para traer sus valores
-    stock: isEditMode.value ? producto.value.stock + Number(nuevoStock.value) : Number(nuevoStock.value) //suma el stock actual al stock nuevo
-  }
-  console.log("*******************************")
-  console.log(productData)
-  //esta constante contendra la direcciòn a la que se enviarà la solicitud
-  const url = isEditMode.value //Este es un valor boolean q indica si el formulario esta en modo de ediciòn 
-    ? `${baseUrl}/products/update-product/${producto.value.code}/` //Si isEditMode.value es true, se construye la URL para actualizar un producto existente, utilizando el código del producto para identificarlo.
-    : `${baseUrl}/products/add-product/`//si isEditMode.value es false se construye la URL para agregar un nuevo producto
-  //Esta constante almacenarà el mètodo HTTP a usar
-  const method = isEditMode.value ? 'PUT' : 'POST' //si estamos en modo de ediciòn , se utilizara PUT para actualizar sino se utilizarà POST para crear
 
-  try { //Aquì se intentara ejecutar el còdigo que puede lanzar excepciones.
-    const response = await fetch(url, { //se realiza una solicitud HTTP utilizando la funcion fetch
-      method: method, //utiliza el mètodo definido anteriormente (PUT o POST)
-      headers: { //Estable el tipo de contenido de la solicitud como JSON indicando que se esta enviando un objeto JSON
+  let productData;
+
+  if (isEditMode.value) {
+    // Prepare data for editing an existing product
+    productData = {
+      category: producto.value.category,
+      description: producto.value.description,
+      price: Number(producto.value.price),
+      stock_change: Number(nuevoStock.value),
+      image: producto.value.image
+    }
+  } else {
+    // Prepare data for adding a new product
+    productData = {
+      ...producto.value,
+      stock: Number(nuevoStock.value),
+      price: Number(producto.value.price)
+    }
+  }
+
+  console.log("Data to be sent to the backend:", productData)
+
+  const url = isEditMode.value
+    ? `${baseUrl}/products/update-product/${producto.value.code}/`
+    : `${baseUrl}/products/add-product/`
+  const method = isEditMode.value ? 'PUT' : 'POST'
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(productData) //Convierte el objeto productData que contiene los datos del producto en una cadena JSON para enviarlo en el cuerpo de la solicitud
+      body: JSON.stringify(productData)
     })
-    if (!response.ok) { //Comprueba si la respuesta del servidor no fue exitosa 
-      throw new Error('Error en la solicitud') //Lanza este error con este mensaje
+    if (!response.ok) {
+      throw new Error('Error en la solicitud')
     }
-    const data = await response.json() // si la respuesta fue exitosa se covierte el cuerpo de la respuesta en un objeto json y se guarda en data
-    console.log('Respuesta del servidor:', data) //Imprime en console los datos del servidor para la depuraciòn
-    //Muestra un mensaje al usuario si el producto fue actualizado o añadido exitosamente dependiendo del modo actual
-    alert(isEditMode.value ? 'Producto actualizado con éxito' : 'Producto añadido con éxito') 
-    resetForm() //llama a esta funciòn que probablemente restablece los campos del formulario en su estado inicial
-  } catch (error) { //Captura cualquier error que ocurra dentro del bloque try
+    const data = await response.json()
+    console.log('Respuesta del servidor:', data)
+    alert(isEditMode.value ? 'Producto actualizado con éxito' : 'Producto añadido con éxito')
+    resetForm()
+  } catch (error) {
     console.error('Hubo un error:', error)
     alert('Ocurrió un error al procesar el producto. Por favor, intente de nuevo.')
   }
