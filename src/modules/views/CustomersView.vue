@@ -25,6 +25,24 @@
       </button>
     </div>
     
+    <!-- Paginación -->
+    <div class="mt-4 flex justify-between items-center mb-6">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1" 
+        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === totalPages" 
+        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+      >
+        Siguiente
+      </button>
+    </div>
     <!-- Vista de escritorio -->
     <div class="hidden md:block overflow-hidden bg-white rounded-lg shadow-xl">
       <table class="min-w-full divide-y divide-gray-200">
@@ -67,24 +85,7 @@
       </table>
     </div>
 
-    <!-- Paginación -->
-    <div class="mt-4 flex justify-between items-center">
-      <button 
-        @click="prevPage" 
-        :disabled="currentPage === 1" 
-        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-      >
-        Anterior
-      </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages" 
-        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-      >
-        Siguiente
-      </button>
-    </div>
+    
 
     <!-- Vista móvil -->
     <div class="md:hidden space-y-4">
@@ -144,7 +145,7 @@
             <button v-if="!isEditing" @click="startEditing" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
               Editar
             </button>
-            <button v-if="isEditing" @click="saveCustomer" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300">
+            <button v-if="isEditing" @click="updateCustomer" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300">
               Guardar
             </button>
             <button @click="closeModal" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300">
@@ -274,7 +275,7 @@ const startEditing = () => {
   isEditing.value = true;
 };
 
-const saveCustomer = async () => {
+const updateCustomer = async () => {
   if (!selectedCustomer.value) return;
 
   try {
