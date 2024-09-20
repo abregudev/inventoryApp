@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="customer in filteredCustomers" :key="customer.id" class="hover:bg-gray-50 transition duration-150 ease-in-out">
+          <tr v-for="customer in paginatedCustomers" :key="customer.id" class="hover:bg-gray-50 transition duration-150 ease-in-out">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-10 w-10">
@@ -59,18 +59,36 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {{ customer.phone }}
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button @click="viewCustomerDetails(customer)" class="text-blue-600 hover:text-blue-900 mr-3">Ver Detalles</button>
-              <button @click="editCustomer(customer)" class="text-indigo-600 hover:text-indigo-900">Editar</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- Paginación -->
+    <div class="mt-4 flex justify-between items-center">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1" 
+        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === totalPages" 
+        class="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+      >
+        Siguiente
+      </button>
+    </div>
+
     <!-- Vista móvil -->
     <div class="md:hidden space-y-4">
-      <div v-for="customer in filteredCustomers" :key="customer.id" class="bg-white shadow rounded-lg p-4">
+      <div v-for="customer in paginatedCustomers" :key="customer.id" class="bg-white shadow rounded-lg p-4">
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center">
             <img class="h-10 w-10 rounded-full mr-3" :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(customer.fullname)}&background=random`" alt="" />
@@ -96,7 +114,7 @@
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
         <div class="p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-900">Detalles del Cliente</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ isEditing ? 'Editar Cliente' : 'Detalles del Cliente' }}</h2>
             <button @click="closeModal" class="text-gray-400 hover:text-gray-500">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -108,18 +126,26 @@
             <div class="flex items-center justify-center mb-4">
               <img class="h-24 w-24 rounded-full" :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCustomer.fullname)}&size=96&background=random`" alt="" />
             </div>
-            <p><span class="font-semibold">Nombre:</span> {{ selectedCustomer.fullname }}</p>
-            <p><span class="font-semibold">DNI:</span> {{ selectedCustomer.dni }}</p>
-            <p><span class="font-semibold">RUC:</span> {{ selectedCustomer.ruc }}</p>
-            <p><span class="font-semibold">Email:</span> {{ selectedCustomer.email }}</p>
-            <p><span class="font-semibold">Teléfono:</span> {{ selectedCustomer.phone }}</p>
-            <p><span class="font-semibold">Dirección:</span> {{ selectedCustomer.address }}</p>
-            <p><span class="font-semibold">Nombre del Negocio:</span> {{ selectedCustomer.business_name }}</p>
+            <div v-for="(value, key) in selectedCustomer" :key="key">
+              <template v-if="key !== 'id'">
+                <label :for="key" class="block text-sm font-medium text-gray-700 capitalize">{{ key.replace('_', ' ') }}</label>
+                <input 
+                  :id="key" 
+                  v-model="selectedCustomer[key]" 
+                  :disabled="!isEditing" 
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                  :class="{ 'bg-gray-100': !isEditing }"
+                >
+              </template>
+            </div>
           </div>
 
           <div class="mt-6 flex justify-end space-x-3">
-            <button @click="editCustomer(selectedCustomer)" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+            <button v-if="!isEditing" @click="startEditing" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
               Editar
+            </button>
+            <button v-if="isEditing" @click="saveCustomer" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-300">
+              Guardar
             </button>
             <button @click="closeModal" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300">
               Cerrar
@@ -143,33 +169,17 @@
           </div>
 
           <form @submit.prevent="submitNewCustomer" class="space-y-4">
-            <div>
-              <label for="fullname" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
-              <input type="text" id="fullname" v-model="newCustomer.fullname" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
-              <input type="text" id="dni" v-model="newCustomer.dni" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-              <input type="email" id="email" v-model="newCustomer.email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
-              <input type="tel" id="phone" v-model="newCustomer.phone" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
-              <input type="text" id="ruc" v-model="newCustomer.ruc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="business_name" class="block text-sm font-medium text-gray-700">Nombre del Negocio</label>
-              <input type="text" id="business_name" v-model="newCustomer.business_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-            </div>
-            <div>
-              <label for="address" class="block text-sm font-medium text-gray-700">Dirección</label>
-              <input type="text" id="address" v-model="newCustomer.address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            <div v-for="(value, key) in newCustomer" :key="key">
+              <template v-if="key !== 'id'">
+                <label :for="key" class="block text-sm font-medium text-gray-700 capitalize">{{ key.replace('_', ' ') }}</label>
+                <input 
+                  :id="key" 
+                  v-model="newCustomer[key]" 
+                  :type="key === 'email' ? 'email' : 'text'" 
+                  :required="['fullname', 'dni', 'email', 'phone'].includes(key)"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                >
+              </template>
             </div>
 
             <div class="mt-6 flex justify-end space-x-3">
@@ -188,7 +198,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { ICustomer } from '../interfaces';
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
@@ -197,6 +207,7 @@ const searchTerm = ref('');
 const isModalOpen = ref(false);
 const selectedCustomer = ref<ICustomer | null>(null);
 const isAddModalOpen = ref(false);
+const isEditing = ref(false);
 const newCustomer = ref<ICustomer>({
   id: 0,
   fullname: '',
@@ -208,12 +219,24 @@ const newCustomer = ref<ICustomer>({
   address: ''
 });
 
+// Paginación
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
 const filteredCustomers = computed(() => {
   return customersData.value.filter(customer => 
     customer.fullname.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
     customer.dni.includes(searchTerm.value) ||
     customer.ruc.includes(searchTerm.value)
   );
+});
+
+const totalPages = computed(() => Math.ceil(filteredCustomers.value.length / itemsPerPage));
+
+const paginatedCustomers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredCustomers.value.slice(start, end);
 });
 
 const listCustomers = async () => {
@@ -236,18 +259,52 @@ const listCustomers = async () => {
 };
 
 const viewCustomerDetails = (customer: ICustomer) => {
-  selectedCustomer.value = customer;
+  selectedCustomer.value = { ...customer };
   isModalOpen.value = true;
+  isEditing.value = false;
 };
 
 const closeModal = () => {
   isModalOpen.value = false;
   selectedCustomer.value = null;
+  isEditing.value = false;
 };
 
-const editCustomer = (customer: ICustomer) => {
-  console.log('Editar cliente:', customer);
-  // Implementar lógica para editar cliente
+const startEditing = () => {
+  isEditing.value = true;
+};
+
+const saveCustomer = async () => {
+  if (!selectedCustomer.value) return;
+
+  try {
+    const customerData = { ...selectedCustomer.value };
+    delete customerData.id;  // Remove id from the data to be sent
+
+    const response = await fetch(`${baseUrl}/customers/update-customer/${selectedCustomer.value.id}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(customerData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+    }
+
+    const updatedCustomer = await response.json();
+    console.log("Cliente actualizado:", updatedCustomer);
+    
+    // Actualizar la lista de clientes
+    await listCustomers();
+    
+    // Cerrar el modal y resetear el modo de edición
+    closeModal();
+  } catch (error) {
+    console.error('Error al actualizar el cliente:', error);
+    // Aquí podrías mostrar un mensaje de error al usuario
+  }
 };
 
 const openAddCustomerModal = () => {
@@ -296,6 +353,22 @@ const submitNewCustomer = async () => {
     // Aquí podrías mostrar un mensaje de error al usuario
   }
 };
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
+watch(searchTerm, () => {
+  currentPage.value = 1;
+});
 
 onMounted(() => {
   listCustomers();

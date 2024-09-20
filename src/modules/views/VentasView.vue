@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="venta in filteredSales" :key="venta.id" class="hover:bg-gray-50">
+          <tr v-for="venta in paginatedSales" :key="venta.id" class="hover:bg-gray-50">
             <td class="border-b border-gray-200 px-6 py-4">{{ formatDate(venta.date) }}</td>
             <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.fullname }}</td>
             <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.dni }}</td>
@@ -53,7 +53,7 @@
 
     <!-- Vista móvil -->
     <div class="md:hidden space-y-4">
-      <div v-for="venta in filteredSales" :key="venta.id" class="bg-white shadow rounded-lg p-4">
+      <div v-for="venta in paginatedSales" :key="venta.id" class="bg-white shadow rounded-lg p-4">
         <div class="flex justify-between items-center mb-2">
           <span class="font-semibold">{{ venta.customer.fullname }}</span>
           <span :class="metodoPagoClase(venta.payment_method)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
@@ -66,6 +66,25 @@
           <button @click="verDetalles(venta)" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">Ver Detalles</button>
         </div>
       </div>
+    </div>
+
+    <!-- Controles de paginación -->
+    <div class="mt-4 flex justify-between items-center">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1" 
+        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === totalPages" 
+        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
+      >
+        Siguiente
+      </button>
     </div>
 
     <!-- Modal de Detalles de Venta -->
@@ -144,6 +163,10 @@ const searchTerm = ref('');
 const isModalOpen = ref(false);
 const selectedVenta = ref<ISale | null>(null);
 
+// Paginación
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
 const listSales = async () => {
   try {
     const response = await fetch(`${baseUrl}/sales/list-sales/`, {
@@ -215,6 +238,26 @@ const filteredSales = computed(() => {
   });
 });
 
+const totalPages = computed(() => Math.ceil(filteredSales.value.length / itemsPerPage));
+
+const paginatedSales = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredSales.value.slice(start, end);
+});
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+};
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+};
+
 onMounted(() => {
   listSales();
 })
@@ -222,14 +265,16 @@ onMounted(() => {
 // Observadores para ver cuando cambian los filtros
 watch(selectedDate, () => {
   console.log("Fecha seleccionada cambiada:", selectedDate.value);
+  currentPage.value = 1;
 });
-
 watch(searchTerm, () => {
   console.log("Término de búsqueda cambiado:", searchTerm.value);
+  currentPage.value = 1;
 });
 
 // Log cada vez que salesData cambia
 watch(salesData, (newSalesData) => {
   console.log("salesData actualizado:", newSalesData);
 });
+
 </script>
