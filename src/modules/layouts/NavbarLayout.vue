@@ -19,9 +19,6 @@
           <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/ventas">
             <FontAwesomeIcon icon="shopping-cart" class="mr-2" /> Ventas
           </RouterLink>
-          <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/customers">
-            <FontAwesomeIcon icon="users" class="mr-2" /> Clientes
-          </RouterLink>
         </nav>
       </div>
     </div>
@@ -39,9 +36,7 @@
       <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/inventario">
         <FontAwesomeIcon icon="box" />
       </RouterLink>
-      <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/nuevoproducto">
-        <FontAwesomeIcon icon="plus-circle" />
-      </RouterLink>
+    
       <RouterLink class="flex items-center text-gray-700 hover:text-gray-900 font-medium" to="/ventas">
         <FontAwesomeIcon icon="shopping-cart" />
       </RouterLink>
