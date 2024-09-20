@@ -128,6 +128,62 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal para Agregar Cliente -->
+    <div v-if="isAddModalOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center p-4">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Agregar Nuevo Cliente</h2>
+            <button @click="closeAddModal" class="text-gray-400 hover:text-gray-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <form @submit.prevent="submitNewCustomer" class="space-y-4">
+            <div>
+              <label for="fullname" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+              <input type="text" id="fullname" v-model="newCustomer.fullname" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="dni" class="block text-sm font-medium text-gray-700">DNI</label>
+              <input type="text" id="dni" v-model="newCustomer.dni" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" id="email" v-model="newCustomer.email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+              <input type="tel" id="phone" v-model="newCustomer.phone" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="ruc" class="block text-sm font-medium text-gray-700">RUC</label>
+              <input type="text" id="ruc" v-model="newCustomer.ruc" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="business_name" class="block text-sm font-medium text-gray-700">Nombre del Negocio</label>
+              <input type="text" id="business_name" v-model="newCustomer.business_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+            <div>
+              <label for="address" class="block text-sm font-medium text-gray-700">Dirección</label>
+              <input type="text" id="address" v-model="newCustomer.address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+            </div>
+
+            <div class="mt-6 flex justify-end space-x-3">
+              <button type="button" @click="closeAddModal" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-300">
+                Cancelar
+              </button>
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
+                Guardar Cliente
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -136,22 +192,21 @@ import { ref, computed, onMounted } from 'vue'
 import type { ICustomer } from '../interfaces';
 const baseUrl = import.meta.env.VITE_BASE_URL;
 
-// Datos ficticios
 const customersData = ref<ICustomer[]>([]);
-  
-  // {
-  //   id: 1,
-  //   fullname: "Juan Pérez",
-  //   dni: "12345678",
-  //   email: "juan.perez@email.com",
-  //   phone: "987654321",
-  //   ruc: "10123456789",
-  //   business_name: "Tienda Juan",
-  //   address: "Av. Principal 123"
-  // }
 const searchTerm = ref('');
 const isModalOpen = ref(false);
 const selectedCustomer = ref<ICustomer | null>(null);
+const isAddModalOpen = ref(false);
+const newCustomer = ref<ICustomer>({
+  id: 0,
+  fullname: '',
+  dni: '',
+  email: '',
+  phone: '',
+  ruc: '',
+  business_name: '',
+  address: ''
+});
 
 const filteredCustomers = computed(() => {
   return customersData.value.filter(customer => 
@@ -161,53 +216,88 @@ const filteredCustomers = computed(() => {
   );
 });
 
-
-const listCustomers = async()=>{
-
-  try{
-    const response = await fetch(`${baseUrl}/customers/list-customers/`,{
+const listCustomers = async () => {
+  try {
+    const response = await fetch(`${baseUrl}/customers/list-customers/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       },
-
     });
-    if (!response.ok){
+    if (!response.ok) {
       throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
     }
-
     const data = await response.json();
     customersData.value = data;
-    console.log("CUSTOMERS", customersData.value)
-
-  }catch(error){
-    console.error('Error al obtener las ventas:', error);
+    console.log("CUSTOMERS", customersData.value);
+  } catch (error) {
+    console.error('Error al obtener los clientes:', error);
   }
-}
-
+};
 
 const viewCustomerDetails = (customer: ICustomer) => {
   selectedCustomer.value = customer;
   isModalOpen.value = true;
-}
+};
 
 const closeModal = () => {
   isModalOpen.value = false;
   selectedCustomer.value = null;
-}
+};
 
 const editCustomer = (customer: ICustomer) => {
   console.log('Editar cliente:', customer);
   // Implementar lógica para editar cliente
-}
+};
 
 const openAddCustomerModal = () => {
-  console.log('Abrir modal para agregar cliente');
-  // Implementar lógica para abrir modal de agregar cliente
-}
+  isAddModalOpen.value = true;
+};
 
-onMounted(()=>{
-  listCustomers()
-})
+const closeAddModal = () => {
+  isAddModalOpen.value = false;
+  // Reiniciar el formulario
+  newCustomer.value = {
+    id: 0,
+    fullname: '',
+    dni: '',
+    email: '',
+    phone: '',
+    ruc: '',
+    business_name: '',
+    address: ''
+  };
+};
 
+const submitNewCustomer = async () => {
+  try {
+    const response = await fetch(`${baseUrl}/customers/add-customer/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newCustomer.value)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("Cliente agregado:", data);
+    
+    // Actualizar la lista de clientes
+    await listCustomers();
+    
+    // Cerrar el modal
+    closeAddModal();
+  } catch (error) {
+    console.error('Error al agregar el cliente:', error);
+    // Aquí podrías mostrar un mensaje de error al usuario
+  }
+};
+
+onMounted(() => {
+  listCustomers();
+});
 </script>
