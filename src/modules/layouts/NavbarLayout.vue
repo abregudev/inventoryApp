@@ -51,7 +51,7 @@
     </nav>
   </div>
 
-  <main class="flex-1 flex-col pt-16 md:pt-20">
+  <main class="flex-1 flex-col pt-10 md:pt-12">
     <RouterView />
   </main>
 </template>
