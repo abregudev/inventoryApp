@@ -16,6 +16,25 @@
         </svg>
       </div>
     </div>
+
+    <!-- Controles de paginación -->
+    <div class="mt-4 flex justify-between items-center mb-6">
+      <button 
+        @click="prevPage" 
+        :disabled="currentPage === 1" 
+        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
+      >
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button 
+        @click="nextPage" 
+        :disabled="currentPage === totalPages" 
+        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
+      >
+        Siguiente
+      </button>
+    </div>
     
     <!-- Vista de escritorio -->
     <div class="hidden md:block overflow-x-auto bg-white rounded-lg shadow overflow-y-auto relative">
@@ -68,24 +87,6 @@
       </div>
     </div>
 
-    <!-- Controles de paginación -->
-    <div class="mt-4 flex justify-between items-center">
-      <button 
-        @click="prevPage" 
-        :disabled="currentPage === 1" 
-        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
-      >
-        Anterior
-      </button>
-      <span>Página {{ currentPage }} de {{ totalPages }}</span>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages" 
-        class="px-4 py-2 bg-indigo-500 text-white rounded disabled:bg-gray-300"
-      >
-        Siguiente
-      </button>
-    </div>
 
     <!-- Modal de Detalles de Venta -->
     <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center p-4">
