@@ -401,7 +401,7 @@ const submitProduct = async () => {
   } catch (error) {
     console.error('Error processing product:', error);
     alert('Ocurrió un error al procesar el producto. Por favor, intente de nuevo.');
-  
+  }
 };
 
 onMounted(() => {
