@@ -72,6 +72,7 @@
           :selectedCategory="selectedCategory"
           @update-categories="updateCategories"
           :key="productListKey"
+          @edit-product="openEditProductModal"
         />
       </div>
     </main>
@@ -89,52 +90,88 @@
       </span>
     </RouterLink>
 
-    <!-- Modal Agregar Producto -->
+    <!-- Modal Agregar/Editar Producto -->
     <div v-if="showProductModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3 text-center">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Agregar Nuevo Producto</h3>
-          <form @submit.prevent="submitProduct" class="mt-2 text-left">
+        <div class="mt-3">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ isEditMode ? 'Editar Producto' : 'Agregar Nuevo Producto' }}</h3>
+            <button @click="closeProductModal" class="text-gray-400 hover:text-gray-500">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Fase 1: Buscar o Insertar Código -->
+          <div v-if="currentPhase === 1">
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-              <input v-model="producto.category" type="text" class="w-full p-2 border rounded-md">
+              <input
+                v-model="searchCode"
+                type="text"
+                placeholder="Ingrese el código del producto"
+                @keyup.enter="searchProduct"
+                class="w-full p-2 text-lg border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none text-center"
+              >
+            </div>
+            <div class="flex justify-between">
+              <button
+                @click="searchProduct"
+                class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors duration-200"
+              >
+                Buscar
+              </button>
+              <button
+                @click="insertNewCode"
+                class="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-600 transition-colors duration-200"
+              >
+                Insertar Nuevo
+              </button>
+            </div>
+          </div>
+
+          <!-- Fase 2: Formulario de Producto -->
+          <form v-if="currentPhase === 2" @submit.prevent="submitProduct" class="mt-2">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Código</label>
+              <input v-model="producto.code" type="text" class="w-full p-2 border rounded-md bg-gray-100" disabled>
             </div>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-              <input v-model="producto.description" type="text" class="w-full p-2 border rounded-md">
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Stock Inicial</label>
-              <input v-model="producto.stock" type="number" class="w-full p-2 border rounded-md">
+              <input v-model="producto.description" type="text" class="w-full p-2 border rounded-md" :disabled="isEditMode">
             </div>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Precio</label>
-              <input v-model="producto.price" type="number" step="0.01" class="w-full p-2 border rounded-md">
+              <input v-model="producto.price" type="number" step="0.01" class="w-full p-2 border rounded-md" :disabled="isEditMode">
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Código</label>
-              <input v-model="producto.code" type="text" class="w-full p-2 border rounded-md">
+            <div v-if="isEditMode" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Stock Actual</label>
+              <input v-model="producto.stock" type="number" class="w-full p-2 border rounded-md bg-gray-100" disabled>
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Imagen del Producto</label>
-              <div
-                @click="triggerFileInput"
-                class="border-2 border-dashed border-gray-300 rounded-lg p-4 h-32 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-              >
-                <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="max-h-full max-w-full object-contain" />
-                <i v-else class="fas fa-plus text-4xl text-gray-400"></i>
+            <div v-if="isEditMode" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Modificar Stock</label>
+              <div class="flex items-center">
+                <button type="button" @click="decrementStock" class="bg-red-500 text-white px-3 py-1 rounded-l-md">-</button>
+                <input v-model="stockChange" type="number" class="w-full p-2 border-t border-b text-center">
+                <button type="button" @click="incrementStock" class="bg-green-500 text-white px-3 py-1 rounded-r-md">+</button>
               </div>
-              <input
-                ref="fileInput"
-                type="file"
-                @change="handleImageUpload"
-                accept="image/*"
-                class="hidden"
-              >
+            </div>
+            <div v-if="!isEditMode" class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Stock Inicial</label>
+              <input v-model="stockChange" type="number" class="w-full p-2 border rounded-md">
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Número de Comprobante</label>
+              <input v-model="receiptNumber" type="text" class="w-full p-2 border rounded-md">
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del responsable</label>
+              <input v-model="responsiblePerson" type="text" class="w-full p-2 border rounded-md">
             </div>
             <div class="flex justify-between mt-4">
               <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors duration-200">
-                Añadir
+                {{ isEditMode ? 'Actualizar' : 'Añadir' }}
               </button>
               <button type="button" @click="closeProductModal" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 transition-colors duration-200">
                 Cancelar
@@ -160,6 +197,9 @@ const categories = ref<string[]>([]);
 const categoryDropdown = ref(null);
 
 const showProductModal = ref(false);
+const currentPhase = ref(1);
+const searchCode = ref('');
+const isEditMode = ref(false);
 const producto = ref({
   category: '',
   description: '',
@@ -168,10 +208,9 @@ const producto = ref({
   code: '',
   image: null as string | null
 });
-const imagePreview = ref('');
-const fileInput = ref<HTMLInputElement | null>(null);
-
-// Nuevo: Clave para forzar la actualización del componente CardProducts
+const stockChange = ref(0);
+const receiptNumber = ref('');
+const responsiblePerson = ref('');
 const productListKey = ref(0);
 
 const totalQuantity = computed(() => {
@@ -200,6 +239,17 @@ const handleClickOutside = (event: MouseEvent) => {
 const openAddProductModal = () => {
   resetProductForm();
   showProductModal.value = true;
+  currentPhase.value = 1;
+  isEditMode.value = false;
+};
+
+const openEditProductModal = (productCode: string) => {
+  resetProductForm();
+  searchCode.value = productCode;
+  showProductModal.value = true;
+  currentPhase.value = 1;
+  isEditMode.value = true;
+  searchProduct();
 };
 
 const closeProductModal = () => {
@@ -216,26 +266,83 @@ const resetProductForm = () => {
     code: '',
     image: null
   };
-  imagePreview.value = '';
+  stockChange.value = 0;
+  receiptNumber.value = '';
+  responsiblePerson.value = '';
+  searchCode.value = '';
+  currentPhase.value = 1;
 };
 
-const triggerFileInput = () => {
-  fileInput.value?.click();
+const searchProduct = async () => {
+  if (!searchCode.value) {
+    alert('Por favor, ingrese un código de producto.');
+    return;
+  }
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/products/search-code/${searchCode.value}/`);
+    if (response.ok) {
+      const data = await response.json();
+      producto.value = { ...data, code: searchCode.value };
+      isEditMode.value = true;
+      currentPhase.value = 2;
+    } else {
+      isEditMode.value = false;
+      producto.value = {
+        category: '',
+        description: '',
+        stock: 0,
+        price: 0,
+        code: searchCode.value,
+        image: null
+      };
+      currentPhase.value = 2;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Ocurrió un error al buscar el producto. Por favor, intente de nuevo.');
+  }
 };
 
-const handleImageUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files && target.files[0]) {
-    const file = target.files[0];
-    const reader = new FileReader();
-    reader.onload = e => {
-      const result = e.target?.result;
-      if (typeof result === 'string') {
-        imagePreview.value = result;
-        producto.value.image = result;
-      }
-    };
-    reader.readAsDataURL(file);
+const insertNewCode = async () => {
+  if (!searchCode.value) {
+    alert('Por favor, ingrese un código de producto.');
+    return;
+  }
+  try {
+    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/products/search-code/${searchCode.value}/`);
+    if (response.ok) {
+      // Si el producto existe, lo cargamos para edición
+      const data = await response.json();
+      producto.value = { ...data, code: searchCode.value };
+      isEditMode.value = true;
+      currentPhase.value = 2;
+      alert('El producto ya existe. Se ha cargado para edición.');
+    } else {
+      // Si el producto no existe, preparamos para crear uno nuevo
+      isEditMode.value = false;
+      producto.value = {
+        category: '',
+        description: '',
+        stock: 0,
+        price: 0,
+        code: searchCode.value,
+        image: null
+      };
+      currentPhase.value = 2;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Ocurrió un error al verificar el producto. Por favor, intente de nuevo.');
+  }
+};
+
+const incrementStock = () => {
+  stockChange.value++;
+};
+
+const decrementStock = () => {
+  if (stockChange.value > 0) {
+    stockChange.value--;
   }
 };
 
@@ -245,37 +352,56 @@ const submitProduct = async () => {
     return;
   }
 
-  const productData = {
-    ...producto.value,
-    stock: Number(producto.value.stock),
-    price: Number(producto.value.price)
-  };
+  const productData = isEditMode.value
+    ? {
+        stock_change: Number(stockChange.value),
+        receipt_number: receiptNumber.value,
+        responsible_person: responsiblePerson.value
+      }
+    : {
+        ...producto.value,
+        stock: Number(stockChange.value),
+        price: Number(producto.value.price),
+        receipt_number: receiptNumber.value,
+        responsible_person: responsiblePerson.value
+      };
 
   console.log("Data to be sent to the backend:", productData);
 
   try {
-    // Aquí deberías hacer la llamada a tu API para agregar el producto
-    // Por ejemplo:
-    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/products/add-product/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(productData)
-    });
-    if (!response.ok) throw new Error('Failed to add product');
-    const data = await response.json();
-    console.log('Product added:', data);
+    const url = isEditMode.value
+      ? `${import.meta.env.VITE_BASE_URL}/products/update-stock/${producto.value.code}/`
+      : `${import.meta.env.VITE_BASE_URL}/products/add-product/`;
+    const method = isEditMode.value ? 'PUT' : 'POST';
 
-    alert('Producto añadido con éxito');
+    // Simulación de envío al backend
+    console.log(`Enviando ${method} request a ${url}`);
+    console.log('Datos enviados:', JSON.stringify(productData));
+
+    // Aquí iría la llamada real al backend
+    // const response = await fetch(url, {
+    //   method: method,
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(productData)
+    // });
+    // if (!response.ok) throw new Error('Failed to process product');
+    // const data = await response.json();
+    // console.log('Product processed:', data);
+
+    // Simulación de respuesta exitosa
+    console.log('Simulación: Producto procesado exitosamente');
+
+    alert(isEditMode.value ? 'Stock actualizado con éxito' : 'Producto añadido con éxito');
     closeProductModal();
     
     // Forzar la actualización de la lista de productos
     productListKey.value += 1;
   } catch (error) {
-    console.error('Error adding product:', error);
-    alert('Ocurrió un error al agregar el producto. Por favor, intente de nuevo.');
-  }
+    console.error('Error processing product:', error);
+    alert('Ocurrió un error al procesar el producto. Por favor, intente de nuevo.');
+  
 };
 
 onMounted(() => {

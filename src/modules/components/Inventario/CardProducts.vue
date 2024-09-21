@@ -1,5 +1,14 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="container mx-auto px-4 py-8 relative">
+    <!-- Botón flotante de edición (ahora a la izquierda) -->
+    <button
+      @click="toggleEditMode"
+      class="fixed bottom-8 left-8 bg-blue-600 text-white rounded-full p-4 shadow-lg z-20 hover:bg-blue-700 transition duration-300"
+    >
+      <PencilIcon v-if="!editMode" class="h-6 w-6" />
+      <XMarkIcon v-else class="h-6 w-6" />
+    </button>
+
     <div v-if="loading">Cargando productos...</div>
     <div v-else-if="error">Error: {{ error }}</div>
     <div v-else-if="filteredProducts.length === 0">No se encontraron productos.</div>
@@ -7,12 +16,16 @@
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-        class="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
+        class="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl relative"
       >
         <div class="relative">
           <img :src="product.image" :alt="product.code" class="w-full h-48 object-cover" />
           <!-- Botón de edición -->
-          <button @click="openEditModal(product)" class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
+          <button 
+            v-if="editMode"
+            @click="openEditModal(product)" 
+            class="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-gray-100"
+          >
             <PencilIcon class="h-5 w-5 text-blue-500" />
           </button>
         </div>
@@ -28,6 +41,7 @@
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-500">Stock: {{ product.stock }}</span>
             <button
+              v-if="!editMode"
               @click="addToCart(product)"
               :disabled="!isInStock(product.stock)"
               class="flex items-center justify-center bg-blue-500 text-white px-3 py-1 rounded-full text-sm hover:bg-blue-600 transition duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
@@ -40,43 +54,26 @@
       </div>
     </div>
 
-    <!-- Modal de edición -->
+    <!-- Modal de edición (sin cambios) -->
     <div v-if="showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
           <h3 class="text-lg leading-6 font-medium text-gray-900">Editar Producto</h3>
           <form @submit.prevent="submitEdit" class="mt-2 text-left">
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-              <input v-model="editingProduct.category" type="text" class="w-full p-2 border rounded-md">
-            </div>
-            <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
               <input v-model="editingProduct.description" type="text" class="w-full p-2 border rounded-md">
-            </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
-              <div class="flex items-center">
-                <button type="button" @click="decreaseStock" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-l-md">
-                  <MinusIcon class="h-5 w-5" />
-                </button>
-                <input v-model="editingProduct.stock" type="number" class="w-full p-2 border-t border-b text-center" readonly>
-                <button type="button" @click="increaseStock" class="bg-gray-200 text-gray-700 px-3 py-1 rounded-r-md">
-                  <PlusIcon class="h-5 w-5" />
-                </button>
-              </div>
             </div>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Precio</label>
               <input v-model="editingProduct.price" type="number" step="0.01" class="w-full p-2 border rounded-md">
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Código</label>
-              <input v-model="editingProduct.code" type="text" class="w-full p-2 border rounded-md" disabled>
-            </div>
             <div class="flex justify-between mt-4">
               <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors duration-200">
                 Actualizar
+              </button>
+              <button type="button" @click="deleteProduct" class="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600 transition-colors duration-200">
+                Eliminar
               </button>
               <button type="button" @click="closeEditModal" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-400 transition-colors duration-200">
                 Cancelar
@@ -90,10 +87,11 @@
 </template>
 
 <script lang="ts" setup>
+// El script permanece sin cambios
 import { ref, onMounted, watch, computed } from 'vue';
 import type IProduct from '@/modules/interfaces/IProduct';
 import { useCartStore } from '@/modules/stores/CartStores';
-import { HeartIcon, PencilIcon, ShoppingCartIcon, MinusIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { HeartIcon, PencilIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps<{
   searchQuery: string;
@@ -110,6 +108,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const showEditModal = ref(false);
 const editingProduct = ref<IProduct | null>(null);
+const editMode = ref(false);
 
 const formatPrice = (price: any): string => {
   const numPrice = Number(price);
@@ -188,6 +187,10 @@ const updateCategories = () => {
   emit('updateCategories', uniqueCategories);
 };
 
+const toggleEditMode = () => {
+  editMode.value = !editMode.value;
+};
+
 const openEditModal = (product: IProduct) => {
   editingProduct.value = { ...product };
   showEditModal.value = true;
@@ -198,24 +201,11 @@ const closeEditModal = () => {
   editingProduct.value = null;
 };
 
-const increaseStock = () => {
-  if (editingProduct.value) {
-    editingProduct.value.stock = Number(editingProduct.value.stock) + 1;
-  }
-};
-
-const decreaseStock = () => {
-  if (editingProduct.value && editingProduct.value.stock > 0) {
-    editingProduct.value.stock = Number(editingProduct.value.stock) - 1;
-  }
-};
-
 const submitEdit = async () => {
   if (!editingProduct.value) return;
 
   const updatedProduct = {
     ...editingProduct.value,
-    stock: Number(editingProduct.value.stock),
     price: Number(editingProduct.value.price)
   };
 
@@ -248,6 +238,33 @@ const submitEdit = async () => {
   } catch (error) {
     console.error('Error al actualizar el producto:', error);
     alert('Ocurrió un error al actualizar el producto. Por favor, intente de nuevo.');
+  }
+};
+
+const deleteProduct = async () => {
+  if (!editingProduct.value) return;
+
+  if (!confirm('¿Está seguro de que desea eliminar este producto?')) return;
+
+  try {
+    const response = await fetch(`${baseUrl}/products/delete-product/${editingProduct.value.code}/`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al eliminar el producto');
+    }
+
+    console.log('Producto eliminado:', editingProduct.value.code);
+
+    // Eliminar el producto de la lista local
+    products.value = products.value.filter(p => p.code !== editingProduct.value?.code);
+
+    closeEditModal();
+    alert('Producto eliminado con éxito');
+  } catch (error) {
+    console.error('Error al eliminar el producto:', error);
+    alert('Ocurrió un error al eliminar el producto. Por favor, intente de nuevo.');
   }
 };
 
