@@ -56,7 +56,7 @@
             <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.fullname }}</td>
             <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.dni }}</td>
             <td class="border-b border-gray-200 px-6 py-4">{{ venta.customer.ruc }}</td>
-            <td class="border-b border-gray-200 px-6 py-4 font-semibold">{{ venta.total }}</td>
+            <td class="border-b border-gray-200 px-6 py-4 font-semibold">{{ venta.total || 'No disponible' }}</td>
             <td class="border-b border-gray-200 px-6 py-4">
               <span :class="metodoPagoClase(venta.payment_method)" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                 {{ venta.payment_method || 'No especificado' }}
@@ -81,12 +81,11 @@
         </div>
         <div class="text-sm text-gray-600 mb-2">{{ formatDate(venta.date) }}</div>
         <div class="flex justify-between items-center">
-          <span class="font-bold">{{ venta.total }}</span>
+          <span class="font-bold">{{ venta.total || 'No disponible' }}</span>
           <button @click="verDetalles(venta)" class="text-indigo-600 hover:text-indigo-900 font-medium text-sm">Ver Detalles</button>
         </div>
       </div>
     </div>
-
 
     <!-- Modal de Detalles de Venta -->
     <div v-if="isModalOpen" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center p-4">
@@ -107,7 +106,7 @@
             <p><span class="font-bold">RUC:</span> {{ selectedVenta.customer.ruc }}</p>
             <p><span class="font-bold">Fecha:</span> {{ formatDate(selectedVenta.date) }}</p>
             <p><span class="font-bold">Método de Pago:</span> {{ selectedVenta.payment_method || 'No especificado' }}</p>
-            <p><span class="font-bold">Total:</span> {{ selectedVenta.total }}</p>
+            <p><span class="font-bold">Total:</span> {{ selectedVenta.total || 'No disponible' }}</p>
           </div>
 
           <div class="mt-6">
@@ -135,17 +134,29 @@
           </div>
 
           <div class="mt-6 space-y-2">
-            <button v-if="selectedVenta && ['yape', 'transferencia'].includes(selectedVenta.payment_method || '')" 
+            <button v-if="selectedVenta && ['yape', 'transferencia'].includes(selectedVenta.payment_method || '') && selectedVenta.comprobante_image" 
                     @click="verComprobante" 
                     class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm transition duration-300">
               Ver Comprobante de Pago
             </button>
-            <button @click="descargarComprobante" 
+            <button v-if="selectedVenta && selectedVenta.comprobante_image" 
+                    @click="descargarComprobante" 
                     class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded text-sm transition duration-300">
               Descargar Comprobante
             </button>
+            <p v-if="!selectedVenta?.comprobante_image" class="text-red-500 text-sm">
+              No hay comprobante disponible para esta venta.
+            </p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal para previsualizar el comprobante -->
+    <div v-if="showComprobantePreview" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div class="bg-white p-4 rounded-lg max-w-xl max-h-[80vh] overflow-auto">
+        <img :src="selectedVenta?.comprobante_image" alt="Comprobante" class="max-w-full h-auto" />
+        <button @click="showComprobantePreview = false" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">Cerrar</button>
       </div>
     </div>
   </div>
@@ -163,6 +174,7 @@ const selectedDate = ref('');
 const searchTerm = ref('');
 const isModalOpen = ref(false);
 const selectedVenta = ref<ISale | null>(null);
+const showComprobantePreview = ref(false);
 
 // Paginación
 const currentPage = ref(1);
@@ -214,18 +226,31 @@ const metodoPagoClase = (metodo: string | undefined): string => {
     case 'transferencia':
       return 'bg-blue-100 text-blue-800';
     default:
-      return 'bg-gray-100 text-gray-800';
+    return 'bg-gray-100 text-gray-800';
   }
 }
 
 const verComprobante = () => {
-  console.log('Ver comprobante');
-  // Implementar lógica para ver el comprobante
+  if (selectedVenta.value && selectedVenta.value.comprobante_image) {
+    showComprobantePreview.value = true;
+  } else {
+    console.log('No hay comprobante disponible');
+    alert('No hay comprobante disponible para esta venta.');
+  }
 }
 
 const descargarComprobante = () => {
-  console.log('Descargar comprobante');
-  // Implementar lógica para descargar el comprobante
+  if (selectedVenta.value && selectedVenta.value.comprobante_image) {
+    const link = document.createElement('a');
+    link.href = selectedVenta.value.comprobante_image;
+    link.download = `comprobante_${selectedVenta.value.id}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } else {
+    console.log('No hay comprobante disponible para descargar');
+    alert('No hay comprobante disponible para descargar.');
+  }
 }
 
 const filteredSales = computed(() => {
@@ -277,5 +302,4 @@ watch(searchTerm, () => {
 watch(salesData, (newSalesData) => {
   console.log("salesData actualizado:", newSalesData);
 });
-
 </script>

@@ -140,7 +140,6 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
 import { useCartStore } from '@/modules/stores/CartStores';
 import { ref, watch, computed } from 'vue';
@@ -170,7 +169,7 @@ const customerData = ref({
 
 const paymentData = ref({
   metodoPago: 'transferencia',
-  comprobante: null as File | null,
+  comprobante: null as string | null,
 })
 
 // Cálculos para el resumen de la venta
@@ -184,7 +183,14 @@ const total = computed(() => subtotal.value + igv.value);
 const handleFileUpload = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files) {
-    paymentData.value.comprobante = target.files[0];
+    const file = target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        paymentData.value.comprobante = e.target.result as string;
+      }
+    };
+    reader.readAsDataURL(file);
   }
 };
 
@@ -208,7 +214,6 @@ const searchCustomerDni = async () => {
           }
         }
       }
-
     }
   }catch(error){
     console.error('Hubo un error:', error);
@@ -234,6 +239,7 @@ const enviarFormulario = async () => {
     })),
     payment:{
       ...paymentData.value,
+      total: total.value
     }
   }
 

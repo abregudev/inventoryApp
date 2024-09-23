@@ -137,12 +137,16 @@
               <input v-model="producto.code" type="text" class="w-full p-2 border rounded-md bg-gray-100" disabled>
             </div>
             <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+              <input v-model="producto.category" type="text" class="w-full p-2 border rounded-md">
+            </div>
+            <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-              <input v-model="producto.description" type="text" class="w-full p-2 border rounded-md" :disabled="isEditMode">
+              <input v-model="producto.description" type="text" class="w-full p-2 border rounded-md">
             </div>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Precio</label>
-              <input v-model="producto.price" type="number" step="0.01" class="w-full p-2 border rounded-md" :disabled="isEditMode">
+              <input v-model="producto.price" type="number" step="0.01" class="w-full p-2 border rounded-md">
             </div>
             <div v-if="isEditMode" class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Stock Actual</label>
@@ -160,7 +164,25 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">Stock Inicial</label>
               <input v-model="stockChange" type="number" class="w-full p-2 border rounded-md">
             </div>
-            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Imagen del Producto</label>
+              <div
+                @click="triggerFileInput"
+                class="border-2 border-dashed border-gray-300 rounded-lg p-4 h-32 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+              >
+                <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="max-h-full max-w-full object-contain" />
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-12 h-12 text-gray-400">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <input
+                ref="fileInput"
+                type="file"
+                @change="handleImageUpload"
+                accept="image/*"
+                class="hidden"
+              >
+            </div>
             <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 mb-2">Número de Comprobante</label>
               <input v-model="receiptNumber" type="text" class="w-full p-2 border rounded-md">
@@ -212,6 +234,8 @@ const stockChange = ref(0);
 const receiptNumber = ref('');
 const responsiblePerson = ref('');
 const productListKey = ref(0);
+const imagePreview = ref('');
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const totalQuantity = computed(() => {
   return cartStore.cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -271,6 +295,7 @@ const resetProductForm = () => {
   responsiblePerson.value = '';
   searchCode.value = '';
   currentPhase.value = 1;
+  imagePreview.value = '';
 };
 
 const searchProduct = async () => {
@@ -283,6 +308,9 @@ const searchProduct = async () => {
     if (response.ok) {
       const data = await response.json();
       producto.value = { ...data, code: searchCode.value };
+      if (data.image) {
+        imagePreview.value = `${import.meta.env.VITE_BASE_URL}${data.image}`;
+      }
       isEditMode.value = true;
       currentPhase.value = 2;
     } else {
@@ -311,14 +339,14 @@ const insertNewCode = async () => {
   try {
     const response = await fetch(`${import.meta.env.VITE_BASE_URL}/products/search-code/${searchCode.value}/`);
     if (response.ok) {
-      // Si el producto existe, lo cargamos para edición
       const data = await response.json();
       producto.value = { ...data, code: searchCode.value };
+      if (data.image) {
+        imagePreview.value = `${import.meta.env.VITE_BASE_URL}${data.image}`;
+      }
       isEditMode.value = true;
-      currentPhase.value = 2;
       alert('El producto ya existe. Se ha cargado para edición.');
     } else {
-      // Si el producto no existe, preparamos para crear uno nuevo
       isEditMode.value = false;
       producto.value = {
         category: '',
@@ -328,8 +356,8 @@ const insertNewCode = async () => {
         code: searchCode.value,
         image: null
       };
-      currentPhase.value = 2;
     }
+    currentPhase.value = 2;
   } catch (error) {
     console.error('Error:', error);
     alert('Ocurrió un error al verificar el producto. Por favor, intente de nuevo.');
@@ -346,6 +374,26 @@ const decrementStock = () => {
   }
 };
 
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+const handleImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    const file = target.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+      const result = e.target?.result;
+      if (typeof result === 'string') {
+        imagePreview.value = result;
+        producto.value.image = result;
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 const submitProduct = async () => {
   if (!producto.value.code) {
     alert('Por favor, ingrese un código de producto.');
@@ -354,7 +402,11 @@ const submitProduct = async () => {
 
   const productData = isEditMode.value
     ? {
+        category: producto.value.category,
+        description: producto.value.description,
+        price: Number(producto.value.price),
         stock_change: Number(stockChange.value),
+        image: producto.value.image,
         receipt_number: receiptNumber.value,
         responsible_person: responsiblePerson.value
       }
@@ -370,30 +422,22 @@ const submitProduct = async () => {
 
   try {
     const url = isEditMode.value
-      ? `${import.meta.env.VITE_BASE_URL}/products/update-stock/${producto.value.code}/`
+      ? `${import.meta.env.VITE_BASE_URL}/products/update-product/${producto.value.code}/`
       : `${import.meta.env.VITE_BASE_URL}/products/add-product/`;
     const method = isEditMode.value ? 'PUT' : 'POST';
 
-    // Simulación de envío al backend
-    console.log(`Enviando ${method} request a ${url}`);
-    console.log('Datos enviados:', JSON.stringify(productData));
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData)
+    });
+    if (!response.ok) throw new Error('Failed to process product');
+    const data = await response.json();
+    console.log('Product processed:', data);
 
-    // Aquí iría la llamada real al backend
-    // const response = await fetch(url, {
-    //   method: method,
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(productData)
-    // });
-    // if (!response.ok) throw new Error('Failed to process product');
-    // const data = await response.json();
-    // console.log('Product processed:', data);
-
-    // Simulación de respuesta exitosa
-    console.log('Simulación: Producto procesado exitosamente');
-
-    alert(isEditMode.value ? 'Stock actualizado con éxito' : 'Producto añadido con éxito');
+    alert(isEditMode.value ? 'Producto actualizado con éxito' : 'Producto añadido con éxito');
     closeProductModal();
     
     // Forzar la actualización de la lista de productos
