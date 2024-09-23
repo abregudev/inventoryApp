@@ -212,7 +212,7 @@ const submitEdit = async () => {
   console.log("Datos a enviar al backend para actualización:", updatedProduct);
 
   try {
-    const response = await fetch(`${baseUrl}/products/update-product/${updatedProduct.code}/`, {
+    const response = await fetch(`${baseUrl}/products/update-product/${editingProduct.value.code}/`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
